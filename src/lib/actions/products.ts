@@ -1,149 +1,92 @@
-"use server";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { products, storageSpaces } from "@/lib/db/schema";
+import { revalidatePath } from "next/cache";
+import { sql } from "drizzle-orm";
+import { z } from "zod";
 
-import { db, schema } from "@/lib/db";
-import { eq, desc, and, gte, lte, ilike } from "drizzle-orm";
-import { getServerUser } from "@/lib/auth-core";
+const productSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  category: z.string().min(1, "Category is required"),
+  subcategory: z.string().optional(),
+  price: z.number().positive("Price must be positive"),
+  inventory: z.number().int().nonnegative().default(0),
+  sku: z.string().optional(),
+  images: z.array(z.string()).default([]),
+  storageId: z.string().uuid().optional(), // link to storage space where product is kept
+});
 
-export interface ProductFilters {
-  category?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  search?: string;
-  city?: string; // filter by storage city
-  sort?: string; // 'price_asc', 'price_desc', 'rating', 'relevance'
-  page?: number;
-  limit?: number;
-}
+type ProductInput = z.infer<typeof productSchema>;
 
-export async function listProducts(filters: ProductFilters = {}) {
-  let query = db.select().from(schema.products).where(eq(schema.products.isActive, true));
-  
-  const conditions = [];
-  if (filters.category) {
-    conditions.push(eq(schema.products.category, filters.category));
-  }
-  if (filters.minPrice !== undefined) {
-    conditions.push(gte(schema.products.price, filters.minPrice));
-  }
-  if (filters.maxPrice !== undefined) {
-    conditions.push(lte(schema.products.price, filters.maxPrice));
-  }
-  if (filters.city) {
-    // Join storage_spaces to filter by city
-    query = query.innerJoin(schema.storageSpaces, eq(schema.products.storageId, schema.storageSpaces.id));
-    conditions.push(ilike(schema.storageSpaces.city, `%${filters.city}%`));
-  }
-  if (filters.search) {
-    const searchTerm = `%${filters.search}%`;
-    conditions.push(
-      ilike(schema.products.title, searchTerm)
-    );
-  }
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions));
-  }
+export async function createProduct(data: ProductInput) {
+  const session = await auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
 
-  // Sorting
-  if (filters.sort === "price_asc") {
-    query = query.orderBy(schema.products.price);
-  } else if (filters.sort === "price_desc") {
-    query = query.orderBy(desc(schema.products.price));
-  } else if (filters.sort === "rating") {
-    query = query.orderBy(desc(schema.products.rating));
-  } else {
-    query = query.orderBy(desc(schema.products.createdAt));
-  }
-  
-  const page = filters.page || 1;
-  const limit = filters.limit || 20;
-  const offset = (page - 1) * limit;
-  
-  const [products, total] = await Promise.all([
-    query.limit(limit).offset(offset).execute(),
-    query.count().execute(),
-  ]);
-  
-  return {
-    products,
-    pagination: {
-      page,
-      limit,
-      total: Number(total),
-      pages: Math.ceil(Number(total) / limit),
-    },
-  };
-}
+  const validated = productSchema.parse(data);
 
-export async function getProduct(id: string) {
-  const [product] = await db.select().from(schema.products).where(eq(schema.products.id, id)).limit(1).execute();
-  return product || null;
-}
+  const [product] = await db
+    .insert(products)
+    .values({
+      ...validated,
+      merchantId: session.user.id,
+      isActive: true,
+    })
+    .returning();
 
-export async function createProduct(data: {
-  title: string;
-  description?: string;
-  category: string;
-  subcategory?: string;
-  price: number;
-  images?: string[];
-  inventory?: number;
-  sku?: string;
-  storageId?: string;
-}) {
-  const [user] = await getServerUser();
-  
-  if (!user || (user.userType !== "merchant" && user.userType !== "admin" && user.userType !== "owner")) {
-    throw new Error("Unauthorized: Only merchants can create products");
-  }
-  
-  const [product] = await db.insert(schema.products).values({
-    merchantId: user.id,
-    ...data,
-    isActive: true,
-  }).returning();
-  
+  revalidatePath("/dashboard/products");
+  revalidatePath("/");
   return product;
 }
 
-export async function updateProduct(id: string, data: Partial<{
-  title: string;
-  description?: string;
-  category: string;
-  subcategory?: string;
-  price: number;
-  images?: string[];
-  inventory?: number;
-  sku?: string;
-  storageId?: string;
-  isActive?: boolean;
-}>) {
-  const [user] = await getServerUser();
-  
-  const existing = await db.select().from(schema.products).where(eq(schema.products.id, id)).limit(1).execute();
-  if (!existing.length) {
-    throw new Error("Product not found");
+export async function updateProduct(id: string, data: Partial<ProductInput>) {
+  const session = await auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const existing = await db.select().from(products).where(sql`id = ${id}`).limit(1);
+  if (!existing || existing[0].merchantId !== session.user.id) {
+    throw new Error("Not authorized");
   }
-  if (existing[0].merchantId !== user.id && user.userType !== "admin") {
-    throw new Error("Unauthorized: You can only edit your own products");
-  }
-  
-  const [updated] = await db.update(schema.products).set(data).where(eq(schema.products.id, id)).returning();
-  
-  return updated;
+
+  const [product] = await db
+    .update(products)
+    .set(data)
+    .where(sql`id = ${id}`)
+    .returning();
+
+  revalidatePath("/dashboard/products");
+  revalidatePath("/");
+  return product;
 }
 
 export async function deleteProduct(id: string) {
-  const [user] = await getServerUser();
-  
-  const existing = await db.select().from(schema.products).where(eq(schema.products.id, id)).limit(1).execute();
-  if (!existing.length) {
-    throw new Error("Product not found");
+  const session = await auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const existing = await db.select().from(products).where(sql`id = ${id}`).limit(1);
+  if (!existing || existing[0].merchantId !== session.user.id) {
+    throw new Error("Not authorized");
   }
-  if (existing[0].merchantId !== user.id && user.userType !== "admin") {
-    throw new Error("Unauthorized: You can only delete your own products");
+
+  await db.delete(products).where(sql`id = ${id}`).execute();
+  revalidatePath("/dashboard/products");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function getProducts() {
+  const session = await auth.getSession();
+  const userId = session?.user?.id;
+
+  const query = db.select().from(products).orderBy(sql`created_at DESC`);
+  if (userId) {
+    return query.where(sql`merchant_id = ${userId}`).limit(100);
+  } else {
+    return query.where(sql`is_active = true`).limit(100);
   }
-  
-  const [deleted] = await db.update(schema.products).set({ isActive: false }).where(eq(schema.products.id, id)).returning();
-  
-  return deleted;
+}
+
+export async function getPublicProducts() {
+  // For homepage/product listing pages
+  return db.select().from(products).where(sql`is_active = true`).orderBy(sql`created_at DESC`).limit(50);
 }

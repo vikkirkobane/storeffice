@@ -287,13 +287,36 @@ User types (`profiles.user_type`):
 | Method | Route | Description |
 |--------|-------|-------------|
 | `GET` | `/api/health` | Health check (DB status) |
-| `GET` | `/api/spaces` | List active office spaces (public) |
-| `GET` | `/api/products` | List active products (public) |
+| `GET` | `/api/dashboard/spaces` | List office spaces (public: active only; logged-in owners: own) |
+| `GET` | `/api/dashboard/storage` | List storage spaces (public: active only; logged-in owners: own) |
 
-### Authenticated (via better-auth)
-All `/dashboard/*` pages and API routes require a valid session.
+### Authenticated Dashboard API Routes
+All `/dashboard/*` pages and API routes require a valid session via better-auth.
 
-Server actions (called from components) manage mutations securely.
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/dashboard/spaces` | Fetch office spaces for current user |
+| `POST` | (Server Action) `createOfficeSpace` | Create new office space |
+| `POST` | (Server Action) `updateOfficeSpace` | Update existing office space |
+| `POST` | (Server Action) `deleteOfficeSpace` | Delete office space |
+| `GET` | `/api/dashboard/storage` | Fetch storage spaces for current user |
+| `POST` | (Server Action) `createStorageSpace` | Create new storage space |
+| `POST` | (Server Action) `updateStorageSpace` | Update existing storage space |
+| `POST` | (Server Action) `deleteStorageSpace` | Delete storage space |
+
+**Note:** Mutations are preferred as Server Actions (called directly from React components) for better type-safety and reduced API surface. These functions live in `src/lib/actions/` and enforce authorization server-side.
+
+### Authentication Endpoints (better-auth)
+The auth handler at `/api/auth/[...better-auth]` manages:
+- `POST /api/auth/register` – user registration
+- `POST /api/auth/login` – sign in
+- `POST /api/auth/logout` – sign out
+- `GET /api/auth/session` – get current session
+- `POST /api/auth/callback/:provider` – OAuth callback (when configured)
+- `POST /api/auth/verify-email` – verify email
+- `POST /api/auth/reset-password` – password reset
+
+See better-auth docs for full list. Configuration is in `src/lib/auth.ts`.
 
 ---
 
