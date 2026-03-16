@@ -1,7 +1,7 @@
 import { getServerUser } from "@/lib/auth-core";
 import { redirect } from "next/navigation";
 import { db, schema } from "@/lib/db";
-import { eq, sql`${Sql}` } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

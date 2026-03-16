@@ -7,6 +7,8 @@ import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
 import { createPaymentIntent } from "@/lib/stripe";
 import { sendEmail } from "@/services/email-service";
 
+export const dynamic = 'force-dynamic';
+
 interface CartItemInput {
   productId: string;
   quantity: number;

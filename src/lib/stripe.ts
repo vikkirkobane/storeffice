@@ -1,19 +1,19 @@
 import Stripe from "stripe";
 
-/**
- * Stripe client initialized with secret key.
- * Used for server-side operations: PaymentIntents, Refunds, Webhook validation.
- */
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia", // Latest stable as of 2025
-  typescript: true,
-});
+let stripe: Stripe | null = null;
+
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2024-12-18.acacia",
+    typescript: true,
+  });
+}
 
 /**
- * Helper: Create a PaymentIntent for a given amount and currency.
- * Attaches metadata to link with our booking/order.
+ * Create a PaymentIntent for a given amount and currency.
  */
 export async function createPaymentIntent(amount: number, currency = "usd", metadata: Record<string, string>) {
+  if (!stripe) throw new Error("Stripe not configured. Set STRIPE_SECRET_KEY.");
   const intent = await stripe.paymentIntents.create({
     amount: Math.round(amount * 100), // Stripe expects cents
     currency,
@@ -24,17 +24,18 @@ export async function createPaymentIntent(amount: number, currency = "usd", meta
 }
 
 /**
- * Helper: Retrieve a PaymentIntent by ID.
+ * Retrieve a PaymentIntent by ID.
  */
 export async function getPaymentIntent(intentId: string) {
+  if (!stripe) throw new Error("Stripe not configured");
   return await stripe.paymentIntents.retrieve(intentId);
 }
 
 /**
- * Helper: Refund a PaymentIntent (or a Charge).
+ * Refund a PaymentIntent (or a Charge).
  */
 export async function refundPayment(paymentIntentId: string, amount?: number) {
-  // Refund the underlying charge
+  if (!stripe) throw new Error("Stripe not configured");
   const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
   const chargeId = intent.charges.data[0]?.id;
   if (!chargeId) throw new Error("No charge associated with this payment");
@@ -54,3 +55,6 @@ export const getWebhookSecret = () => {
   if (!secret) throw new Error("STRIPE_WEBHOOK_SECRET not set");
   return secret;
 };
+
+// Legacy export (avoid using directly; use the functions above)
+export { stripe as _stripe };

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe, getWebhookSecret } from "@/lib/stripe";
 import { db, schema } from "@/lib/db";
-import { eq, sql`${Sql}` } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { sendEmail } from "@/services/email-service";
+
+export const dynamic = 'force-dynamic';
 
 // Helper to clear user's cart
 async function clearUserCart(userId: string) {

@@ -226,6 +226,19 @@ export const cartItems = pgTable("cart_items", {
   index("idx_cart_items_product").on(table.productId),
 ]);
 
+// Refresh Tokens (for JWT rotation)
+export const refreshTokens = pgTable("refresh_tokens", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => profiles.id).notNull(),
+  token: text("token").notNull().unique(),
+  revoked: boolean("revoked").default(false),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_refresh_tokens_user").on(table.userId),
+  index("idx_refresh_tokens_token").on(table.token),
+]);
+
 // Notifications
 export const notifications = pgTable("notifications", {
   id: uuid("id").defaultRandom().primaryKey(),

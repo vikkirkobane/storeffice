@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { db, schema } from "@/lib/db";
-import { eq, and, sql`${Sql}` } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { verifyAccessToken, getUserById } from "@/lib/auth-core";
 
 /**

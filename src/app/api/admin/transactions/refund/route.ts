@@ -5,6 +5,8 @@ import { eq } from "drizzle-orm";
 import { verifyAccessToken, getUserById } from "@/lib/auth-core";
 import { refundPayment } from "@/lib/stripe";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/admin/transactions/refund
  * Query params: ?type=booking|order&id=<entityId>

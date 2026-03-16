@@ -6,6 +6,8 @@ import { verifyAccessToken } from "@/lib/auth-core";
 import { refundPayment } from "@/lib/stripe";
 import { requireRole } from "@/lib/auth-middleware"; // We'll create if missing
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/payments/[id]/refund
  * Refund a payment (full or partial). Admin or the original payer can refund.

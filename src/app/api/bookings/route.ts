@@ -7,6 +7,8 @@ import { verifyAccessToken, getUserById } from "@/lib/auth-core";
 import { createPaymentIntent } from "@/lib/stripe";
 import { sendEmail } from "@/services/email-service";
 
+export const dynamic = 'force-dynamic';
+
 const createBookingSchema = z.object({
   spaceId: z.string().uuid(),
   startDate: z.string().datetime(),

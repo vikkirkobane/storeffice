@@ -21,10 +21,8 @@ async function getOrCreateConversation(userId: string, otherUserId: string) {
     return existing[0].conversationId;
   }
 
-  // Create new conversation by inserting a placeholder message? Or create a conversations table.
-  // Simpler: generate a new UUID for conversationId and store in messages
-  const { v4: uuidv4 } = await import("uuid");
-  const conversationId = uuidv4();
+  // Create new conversation by generating a UUID
+  const conversationId = crypto.randomUUID();
   return conversationId;
 }
 
@@ -131,102 +129,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ conversationId, participant: participant[0] });
   } catch (error) {
     console.error("POST /api/conversations error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
-}
-
-/**
- * GET /api/conversations/:id/messages
- * Returns messages for a conversation (paginated).
- */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id: conversationId } = await params;
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("access_token")?.value;
-    if (!accessToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const payload = await verifyAccessToken(accessToken);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-
-    const { searchParams } = new URL(request.url);
-    const limit = Math.min(Number(searchParams.get("limit")) || 50, 100);
-    const offset = Number(searchParams.get("offset")) || 0;
-
-    // Find messages where user is participant
-    const messages = await db.select().from(schema.messages)
-      .where(eq(schema.messages.conversationId, conversationId))
-      .orderBy(desc(schema.messages.createdAt))
-      .limit(limit)
-      .offset(offset)
-      .execute();
-
-    // Mark as read if user is receiver
-    await db.update(schema.messages).set({ isRead: true }).where(
-      eq(schema.messages.conversationId, conversationId).and(eq(schema.messages.receiverId, payload.userId)).and(eq(schema.messages.isRead, false))
-    );
-
-    return NextResponse.json({ messages: messages.reverse() });
-  } catch (error) {
-    console.error("GET /api/conversations/:id/messages error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
-}
-
-/**
- * POST /api/conversations/:id/messages
- * Body: { content: string }
- */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id: conversationId } = await params;
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("access_token")?.value;
-    if (!accessToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const payload = await verifyAccessToken(accessToken);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-
-    const { content } = await request.json().then(b => b as { content: string });
-    if (!content || typeof content !== "string" || content.trim() === "") {
-      return NextResponse.json({ error: "Message content required" }, { status: 400 });
-    }
-
-    // Verify user is part of conversation (check a message exists with this conversationId and user as sender or receiver)
-    const existing = await db.select().from(schema.messages)
-      .where(
-        sql`${schema.messages.conversationId} = ${conversationId} AND (${schema.messages.senderId} = ${payload.userId} OR ${schema.messages.receiverId} = ${payload.userId})`
-      )
-      .limit(1)
-      .execute();
-
-    if (existing.length === 0) {
-      return NextResponse.json({ error: "Conversation not found or access denied" }, { status: 404 });
-    }
-
-    // Determine receiver: from existing messages, find the other participant
-    const anyMsg = existing[0];
-    const receiverId = anyMsg.senderId === payload.userId ? anyMsg.receiverId : anyMsg.senderId;
-
-    const [message] = await db.insert(schema.messages).values({
-      conversationId,
-      senderId: payload.userId,
-      receiverId,
-      content: content.trim(),
-      isRead: false,
-    }).returning();
-
-    // Could trigger notification to receiver here
-
-    return NextResponse.json({ message });
-  } catch (error) {
-    console.error("POST /api/conversations/:id/messages error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

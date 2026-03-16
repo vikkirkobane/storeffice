@@ -6,6 +6,8 @@ import { verifyAccessToken, getUserById } from "@/lib/auth-core";
 import { createPaymentIntent, getWebhookSecret } from "@/lib/stripe";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/payments/create-intent
  * Creates a Stripe PaymentIntent for a booking or order.

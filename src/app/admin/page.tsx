@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { db, schema } from "@/lib/db";
-import { sql`${Sql}` } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { Users, Building2, Package, ShoppingCart } from "lucide-react";
 
 export default async function AdminPage() {
