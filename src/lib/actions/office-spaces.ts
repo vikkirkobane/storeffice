@@ -1,153 +1,98 @@
-"use server";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { officeSpaces, storageSpaces, products } from "@/lib/db/schema";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { sql } from "drizzle-orm";
+import { z } from "zod";
 
-import { db, schema } from "@/lib/db";
-import { eq, and, gte, lte, ilike, inArray, desc } from "drizzle-orm";
-import { getServerUser } from "@/lib/auth-core";
+const officeSpaceSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  zipCode: z.string().min(1, "ZIP code is required"),
+  country: z.string().default("USA"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  photos: z.array(z.string()).default([]),
+  amenities: z.array(z.string()).default([]),
+  capacity: z.number().int().positive("Capacity must be positive"),
+  hourlyPrice: z.number().nonnegative().optional(),
+  dailyPrice: z.number().nonnegative().optional(),
+  weeklyPrice: z.number().nonnegative().optional(),
+  monthlyPrice: z.number().nonnegative().optional(),
+});
 
-export interface OfficeSpaceFilters {
-  city?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  capacity?: number;
-  amenities?: string[];
-  page?: number;
-  limit?: number;
-}
+type OfficeSpaceInput = z.infer<typeof officeSpaceSchema>;
 
-export async function listOfficeSpaces(filters: OfficeSpaceFilters = {}) {
-  const [user] = await getServerUser();
-  
-  // Build query
-  let query = db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.isActive, true));
-  
-  // Apply filters
-  const conditions = [];
-  if (filters.city) {
-    conditions.push(eq(schema.officeSpaces.city, filters.city));
-  }
-  if (filters.minPrice !== undefined) {
-    conditions.push(gte(schema.officeSpaces.hourlyPrice || 0, filters.minPrice));
-  }
-  if (filters.maxPrice !== undefined) {
-    conditions.push(lte(schema.officeSpaces.hourlyPrice || 999999, filters.maxPrice));
-  }
-  if (filters.capacity) {
-    conditions.push(gte(schema.officeSpaces.capacity, filters.capacity));
-  }
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions));
-  }
-  
-  // Pagination
-  const page = filters.page || 1;
-  const limit = filters.limit || 20;
-  const offset = (page - 1) * limit;
-  
-  const [spaces, total] = await Promise.all([
-    query.orderBy(desc(schema.officeSpaces.createdAt)).limit(limit).offset(offset).execute(),
-    query.count().execute(),
-  ]);
-  
-  return {
-    spaces,
-    pagination: {
-      page,
-      limit,
-      total: Number(total),
-      pages: Math.ceil(Number(total) / limit),
-    },
-  };
-}
+export async function createOfficeSpace(data: OfficeSpaceInput) {
+  const session = await auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
 
-export async function getOfficeSpace(id: string) {
-  const [user] = await getServerUser();
-  
-  const spaces = await db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.id, id)).limit(1).execute();
-  return spaces[0] || null;
-}
+  const validated = officeSpaceSchema.parse(data);
 
-export async function createOfficeSpace(data: {
-  title: string;
-  description?: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country?: string;
-  latitude?: number;
-  longitude?: number;
-  photos?: string[];
-  amenities?: string[];
-  capacity: number;
-  hourlyPrice?: number;
-  dailyPrice?: number;
-  weeklyPrice?: number;
-  monthlyPrice?: number;
-}) {
-  const [user] = await getServerUser();
-  
-  if (!user || (user.userType !== "owner" && user.userType !== "admin")) {
-    throw new Error("Unauthorized: Only owners can create office spaces");
-  }
-  
-  const [space] = await db.insert(schema.officeSpaces).values({
-    ownerId: user.id,
-    ...data,
-    isActive: true,
-  }).returning();
-  
+  const [space] = await db
+    .insert(officeSpaces)
+    .values({
+      ...validated,
+      ownerId: session.user.id,
+    })
+    .returning();
+
+  revalidatePath("/dashboard/spaces");
+  revalidatePath("/");
   return space;
 }
 
-export async function updateOfficeSpace(id: string, data: Partial<{
-  title: string;
-  description?: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country?: string;
-  latitude?: number;
-  longitude?: number;
-  photos?: string[];
-  amenities?: string[];
-  capacity: number;
-  hourlyPrice?: number;
-  dailyPrice?: number;
-  weeklyPrice?: number;
-  monthlyPrice?: number;
-  isActive?: boolean;
-}>) {
-  const [user] = await getServerUser();
-  
+export async function updateOfficeSpace(id: string, data: Partial<OfficeSpaceInput>) {
+  const session = await auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
+
   // Check ownership
-  const existing = await db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.id, id)).limit(1).execute();
-  if (!existing.length) {
-    throw new Error("Office space not found");
+  const existing = await db.select().from(officeSpaces).where(sql`id = ${id}`).limit(1);
+  if (!existing || existing[0].ownerId !== session.user.id) {
+    throw new Error("Not authorized");
   }
-  if (existing[0].ownerId !== user.id && user.userType !== "admin") {
-    throw new Error("Unauthorized: You can only edit your own spaces");
-  }
-  
-  const [updated] = await db.update(schema.officeSpaces).set(data).where(eq(schema.officeSpaces.id, id)).returning();
-  
-  return updated;
+
+  const [space] = await db
+    .update(officeSpaces)
+    .set(data)
+    .where(sql`id = ${id}`)
+    .returning();
+
+  revalidatePath("/dashboard/spaces");
+  revalidatePath("/");
+  return space;
 }
 
 export async function deleteOfficeSpace(id: string) {
-  const [user] = await getServerUser();
-  
-  // Check ownership
-  const existing = await db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.id, id)).limit(1).execute();
-  if (!existing.length) {
-    throw new Error("Office space not found");
+  const session = await auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const existing = await db.select().from(officeSpaces).where(sql`id = ${id}`).limit(1);
+  if (!existing || existing[0].ownerId !== session.user.id) {
+    throw new Error("Not authorized");
   }
-  if (existing[0].ownerId !== user.id && user.userType !== "admin") {
-    throw new Error("Unauthorized: You can only delete your own spaces");
+
+  await db.delete(officeSpaces).where(sql`id = ${id}`).execute();
+  revalidatePath("/dashboard/spaces");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function getOfficeSpaces() {
+  const session = await auth.getSession();
+  const userId = session?.user?.id;
+
+  // Public: show all active spaces; Owner: show own including inactive
+  const query = db.select().from(officeSpaces).orderBy(sql`created_at DESC`);
+  if (userId) {
+    // Show user's own spaces, include inactive for owners
+    return query.where(sql`owner_id = ${userId}`).limit(100);
+  } else {
+    // Public: only active spaces
+    return query.where(sql`is_active = true`).limit(100);
   }
-  
-  // Soft delete: set is_active = false
-  const [deleted] = await db.update(schema.officeSpaces).set({ isActive: false }).where(eq(schema.officeSpaces.id, id)).returning();
-  
-  return deleted;
 }
