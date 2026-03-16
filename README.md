@@ -59,9 +59,98 @@ Victor Chogo — Full-Stack & AI Engineer with 5+ years in cloud-native applicat
 
 ---
 
-## ✨ Key Features
+## 📁 Project Structure
 
-### For Office Owners
+```
+storeffice/
+├── .env.example                 # Environment variables template
+├── .gitignore                   # Git ignore rules
+├── docker-compose.yml           # Local PostgreSQL dev environment
+├── drizzle.config.ts            # Drizzle configuration
+├── drizzle/                     # Generated migrations (SQL files)
+│   ├── meta/
+│   └── *.sql
+├── package.json                 # Dependencies and scripts
+├── tsconfig.json                # TypeScript configuration
+├── next.config.ts               # Next.js configuration
+├── tailwind.config.mjs          # Tailwind CSS configuration
+├── postcss.config.mjs           # PostCSS configuration
+├── public/                      # Static assets (images, favicon, etc.)
+│
+├── src/
+│   ├── app/                     # Next.js App Router (pages + layout)
+│   │   ├── (auth)/              # Authentication pages (login, register)
+│   │   │   ├── login/page.tsx
+│   │   │   ├── register/page.tsx
+│   │   │   └── check-email/page.tsx
+│   │   ├── (dashboard)/         # Protected dashboard pages
+│   │   │   ├── layout.tsx       # Dashboard shell (nav + sidebar)
+│   │   │   ├── page.tsx         # Dashboard home
+│   │   │   ├── spaces/page.tsx  # Office spaces management
+│   │   │   └── storage/page.tsx # Storage spaces management
+│   │   ├── api/
+│   │   │   ├── auth/[...better-auth]/route.ts  # better-auth handler
+│   │   │   ├── dashboard/spaces/route.ts        # List spaces (GET)
+│   │   │   ├── api/dashboard/storage/route.ts
+│   │   │   └── health/route.ts  # Health check endpoint
+│   │   ├── layout.tsx           # Root layout (public)
+│   │   ├── page.tsx             # Homepage (marketing)
+│   │   └── globals.css          # Global styles
+│   │
+│   ├── components/              # Reusable React components
+│   │   ├── auth/
+│   │   │   ├── login-form.tsx
+│   │   │   └── register-form.tsx
+│   │   ├── dashboard/
+│   │   │   ├── dashboard-nav.tsx
+│   │   │   ├── sidebar.tsx
+│   │   │   ├── office-spaces-list.tsx
+│   │   │   ├── new-office-space-button.tsx
+│   │   │   ├── storage-spaces-list.tsx
+│   │   │   └── new-storage-space-button.tsx
+│   │   ├── sections/            # Marketing page sections (Hero, Features, etc.)
+│   │   └── ui/                  # Generic UI primitives (buttons, cards, etc.)
+│   │
+│   ├── lib/                     # Core libraries & utilities
+│   │   ├── db/
+│   │   │   ├── index.ts         # Drizzle connection (db instance)
+│   │   │   └── schema.ts        # Complete PostgreSQL schema (Drizzle)
+│   │   ├── actions/             # Server Actions (mutations)
+│   │   │   ├── office-spaces.ts
+│   │   │   └── storage-spaces.ts
+│   │   └── auth.ts              # better-auth configuration
+│   │
+│   ├── middleware.ts            # Next.js middleware (route protection)
+│   └── types/                   # TypeScript type definitions (if needed)
+│
+├── docs/                        # Additional documentation
+│   ├── API.md                   # API reference (to be generated)
+│   ├── Schema.md                # Database ER diagram (to be generated)
+│   └── Deployment.md            # Deployment guides
+│
+├── schema/                      # Original Supabase schema files (reference)
+│   ├── schema.sql
+│   ├── supabase_schema.sql
+│   └── ...
+│
+└── __tests__/                   # Test files (unit & integration)
+```
+
+### Key Conventions
+
+- **App Router**: All pages live under `src/app/`. Group routes with parentheses `(auth)` for layout grouping without affecting URL.
+- **Server Components by default**: Use `"use client"` directive only when interactivity (state, effects) is needed.
+- **Server Actions**: Mutations are defined in `src/lib/actions/` and called from client components. This keeps API surface minimal and enforces server-side validation.
+- **Drizzle ORM**: Schema defined in `src/lib/db/schema.ts`. All tables, relations, and indexes are in one place. Use `db.insert/update/select` in server actions or API routes.
+- **Authentication**: better-auth manages sessions via cookies. The `auth` object from `src/lib/auth.ts` is used in server components to get the current user (`await auth.getSession()`).
+- **Styling**: Tailwind CSS v4 with utility‑first classes. Radix UI provides accessible primitives (dialog, dropdown, etc.).
+- **Environment**: All secrets in `.env` (never committed). Copy `.env.example` and fill values.
+
+---
+
+## 🗄 Database Schema
+
+The platform uses a comprehensive PostgreSQL schema with 30+ tables. Key entities:
 - List spaces with photos, amenities, capacity, pricing (hourly/daily/weekly/monthly)
 - Real-time calendar and availability management
 - Booking requests with approval workflow

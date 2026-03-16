@@ -1,148 +1,94 @@
-"use server";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { storageSpaces } from "@/lib/db/schema";
+import { revalidatePath } from "next/cache";
+import { sql } from "drizzle-orm";
+import { z } from "zod";
 
-import { db, schema } from "@/lib/db";
-import { eq, and, gte, lte, desc } from "drizzle-orm";
-import { getServerUser } from "@/lib/auth-core";
+const storageSpaceSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  zipCode: z.string().min(1, "ZIP code is required"),
+  country: z.string().default("USA"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  photos: z.array(z.string()).default([]),
+  storageType: z.enum(["shelf", "room", "warehouse"]),
+  lengthFt: z.number().positive().optional(),
+  widthFt: z.number().positive().optional(),
+  heightFt: z.number().positive().optional(),
+  features: z.array(z.string()).default([]),
+  monthlyPrice: z.number().nonnegative(),
+  annualPrice: z.number().nonnegative().optional(),
+});
 
-export interface StorageSpaceFilters {
-  city?: string;
-  storageType?: "shelf" | "room" | "warehouse";
-  minPrice?: number;
-  maxPrice?: number;
-  page?: number;
-  limit?: number;
-}
+type StorageSpaceInput = z.infer<typeof storageSpaceSchema>;
 
-export async function listStorageSpaces(filters: StorageSpaceFilters = {}) {
-  const [user] = await getServerUser();
-  
-  let query = db.select().from(schema.storageSpaces).where(eq(schema.storageSpaces.isActive, true));
-  
-  const conditions = [];
-  if (filters.city) {
-    conditions.push(eq(schema.storageSpaces.city, filters.city));
-  }
-  if (filters.storageType) {
-    conditions.push(eq(schema.storageSpaces.storageType, filters.storageType));
-  }
-  if (filters.minPrice !== undefined) {
-    conditions.push(gte(schema.storageSpaces.monthlyPrice, filters.minPrice));
-  }
-  if (filters.maxPrice !== undefined) {
-    conditions.push(lte(schema.storageSpaces.monthlyPrice, filters.maxPrice));
-  }
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions));
-  }
-  
-  const page = filters.page || 1;
-  const limit = filters.limit || 20;
-  const offset = (page - 1) * limit;
-  
-  const [spaces, total] = await Promise.all([
-    query.orderBy(desc(schema.storageSpaces.createdAt)).limit(limit).offset(offset).execute(),
-    query.count().execute(),
-  ]);
-  
-  return {
-    spaces,
-    pagination: {
-      page,
-      limit,
-      total: Number(total),
-      pages: Math.ceil(Number(total) / limit),
-    },
-  };
-}
+export async function createStorageSpace(data: StorageSpaceInput) {
+  const session = await auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
 
-export async function getStorageSpace(id: string) {
-  const spaces = await db.select().from(schema.storageSpaces).where(eq(schema.storageSpaces.id, id)).limit(1).execute();
-  return spaces[0] || null;
-}
+  const validated = storageSpaceSchema.parse(data);
 
-export async function createStorageSpace(data: {
-  title: string;
-  description?: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country?: string;
-  latitude?: number;
-  longitude?: number;
-  photos?: string[];
-  storageType: "shelf" | "room" | "warehouse";
-  lengthFt?: number;
-  widthFt?: number;
-  heightFt?: number;
-  features?: string[];
-  monthlyPrice: number;
-  annualPrice?: number;
-}) {
-  const [user] = await getServerUser();
-  
-  if (!user || (user.userType !== "owner" && user.userType !== "merchant" && user.userType !== "admin")) {
-    throw new Error("Unauthorized: Only owners/merchants can create storage spaces");
-  }
-  
-  const [space] = await db.insert(schema.storageSpaces).values({
-    ownerId: user.id,
-    ...data,
-    isActive: true,
-    isAvailable: true,
-  }).returning();
-  
+  const [space] = await db
+    .insert(storageSpaces)
+    .values({
+      ...validated,
+      ownerId: session.user.id,
+    })
+    .returning();
+
+  revalidatePath("/dashboard/storage");
+  revalidatePath("/");
   return space;
 }
 
-export async function updateStorageSpace(id: string, data: Partial<{
-  title: string;
-  description?: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country?: string;
-  latitude?: number;
-  longitude?: number;
-  photos?: string[];
-  storageType?: "shelf" | "room" | "warehouse";
-  lengthFt?: number;
-  widthFt?: number;
-  heightFt?: number;
-  features?: string[];
-  monthlyPrice?: number;
-  annualPrice?: number;
-  isActive?: boolean;
-  isAvailable?: boolean;
-}>) {
-  const [user] = await getServerUser();
-  
-  const existing = await db.select().from(schema.storageSpaces).where(eq(schema.storageSpaces.id, id)).limit(1).execute();
-  if (!existing.length) {
-    throw new Error("Storage space not found");
+export async function updateStorageSpace(id: string, data: Partial<StorageSpaceInput>) {
+  const session = await auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const existing = await db.select().from(storageSpaces).where(sql`id = ${id}`).limit(1);
+  if (!existing || existing[0].ownerId !== session.user.id) {
+    throw new Error("Not authorized");
   }
-  if (existing[0].ownerId !== user.id && user.userType !== "admin") {
-    throw new Error("Unauthorized: You can only edit your own spaces");
-  }
-  
-  const [updated] = await db.update(schema.storageSpaces).set(data).where(eq(schema.storageSpaces.id, id)).returning();
-  
-  return updated;
+
+  const [space] = await db
+    .update(storageSpaces)
+    .set(data)
+    .where(sql`id = ${id}`)
+    .returning();
+
+  revalidatePath("/dashboard/storage");
+  revalidatePath("/");
+  return space;
 }
 
 export async function deleteStorageSpace(id: string) {
-  const [user] = await getServerUser();
-  
-  const existing = await db.select().from(schema.storageSpaces).where(eq(schema.storageSpaces.id, id)).limit(1).execute();
-  if (!existing.length) {
-    throw new Error("Storage space not found");
+  const session = await auth.getSession();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const existing = await db.select().from(storageSpaces).where(sql`id = ${id}`).limit(1);
+  if (!existing || existing[0].ownerId !== session.user.id) {
+    throw new Error("Not authorized");
   }
-  if (existing[0].ownerId !== user.id && user.userType !== "admin") {
-    throw new Error("Unauthorized: You can only delete your own spaces");
+
+  await db.delete(storageSpaces).where(sql`id = ${id}`).execute();
+  revalidatePath("/dashboard/storage");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function getStorageSpaces() {
+  const session = await auth.getSession();
+  const userId = session?.user?.id;
+
+  const query = db.select().from(storageSpaces).orderBy(sql`created_at DESC`);
+  if (userId) {
+    return query.where(sql`owner_id = ${userId}`).limit(100);
+  } else {
+    return query.where(sql`is_active = true`).limit(100);
   }
-  
-  const [deleted] = await db.update(schema.storageSpaces).set({ isActive: false }).where(eq(schema.storageSpaces.id, id)).returning();
-  
-  return deleted;
 }
