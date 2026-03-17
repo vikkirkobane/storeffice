@@ -1,6 +1,14 @@
-import { Paystack } from "@paystack/paystack-sdk";
+// Support both default and named exports from @paystack/paystack-sdk
+import * as PaystackModule from "@paystack/paystack-sdk";
 
-let paystackInstance: Paystack | null = null;
+// Some bundlers export the class as default, others as named export
+const Paystack = (PaystackModule as any).Paystack || (PaystackModule as any).default;
+
+if (!Paystack) {
+  throw new Error("@paystack/paystack-sdk did not export a Paystack constructor. Check SDK version.");
+}
+
+let paystackInstance: any = null;
 
 if (process.env.PAYSTACK_SECRET_KEY) {
   paystackInstance = new Paystack(process.env.PAYSTACK_SECRET_KEY);
@@ -10,7 +18,7 @@ export const paystack = paystackInstance;
 
 /**
  * Initialize a Paystack transaction.
- * amount: in kobo (NGN) or cents for USD/EUR/GBP? Paystack expects amount in the smallest unit (e.g., cents for USD).
+ * amount: in the smallest currency unit (e.g., cents for USD)
  * metadata: optional key-value pairs to attach to the transaction.
  * Returns: transaction data with authorization_url, reference, etc.
  */
@@ -21,21 +29,19 @@ export async function initializePaystackTransaction(
   metadata?: Record<string, string>
 ) {
   if (!paystack) throw new Error("Paystack not configured. Set PAYSTACK_SECRET_KEY.");
-  // Paystack expects amount in the smallest currency unit (e.g., cents for USD)
   const amountInSmallest = Math.round(amount * 100);
   const response = await paystack.transaction.initialize({
     email,
     amount: amountInSmallest,
-    currency: currency as any, // "usd", "ngn", "eur", "gbp"
+    currency: currency as any,
     metadata,
-    callback_url: process.env.PAYSTACK_CALLBACK_URL, // optional: route to verify after redirect
+    callback_url: process.env.PAYSTACK_CALLBACK_URL,
   });
   return response.data;
 }
 
 /**
  * Verify a Paystack transaction by reference.
- * Returns transaction details.
  */
 export async function verifyPaystackTransaction(reference: string) {
   if (!paystack) throw new Error("Paystack not configured");
@@ -44,10 +50,7 @@ export async function verifyPaystackTransaction(reference: string) {
 }
 
 /**
- * Refund a transaction (full or partial).
- * reference: the Paystack transaction reference
- * amount?: in the smallest currency unit (cents for USD). If omitted, full refund.
- * notes?: reason for refund
+ * Refund a transaction.
  */
 export async function refundPaystackTransaction(reference: string, amount?: number, notes?: string) {
   if (!paystack) throw new Error("Paystack not configured");
@@ -57,7 +60,6 @@ export async function refundPaystackTransaction(reference: string, amount?: numb
   });
   return response.data;
 }
-
 
 /**
  * Construct Paystack webhook secret from environment.
