@@ -2,52 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme colors from src/theme/colors.ts */
 :root {
+  /* Light mode */
+  --text: 223 19% 14%;
   --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --primary: 142 70% 40%; /* green-600 */
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
+  --tint: 160 84% 39%;
+  --icon: 210 8% 66%;
+  --tabIconDefault: 210 8% 66%;
+  --tabIconSelected: 160 84% 39%;
+
+  /* Semantic aliases */
+  --foreground: var(--text);
+  --card: var(--background);
+  --card-foreground: var(--text);
+  --popover: var(--background);
+  --popover-foreground: var(--text);
+  --primary: 160 84% 39%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: var(--text);
+  --muted: 210 40% 96%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 142 70% 40%; /* green-600 */
-  --accent-foreground: 210 40% 98%;
+  --accent: 160 84% 39%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 142 70% 40%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 210 15% 90%;
+  --input: var(--border);
+  --ring: 160 84% 39%;
+
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
+  /* Dark mode */
+  --text: 210 9% 93%;
+  --background: 210 11% 9%;
+  --tint: 145 73% 67%;
+  --icon: 210 8% 66%;
+  --tabIconDefault: 210 8% 66%;
+  --tabIconSelected: 145 73% 67%;
+
+  /* Semantic aliases */
+  --foreground: var(--text);
   --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
+  --card-foreground: var(--text);
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: var(--text);
   --primary: 142 70% 40%;
-  --primary-foreground: 210 40% 98%;
+  --primary-foreground: 0 0% 100%;
   --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary-foreground: var(--text);
   --muted: 217.2 32.6% 17.5%;
   --muted-foreground: 215 20.2% 65.1%;
   --accent: 142 70% 40%;
-  --accent-foreground: 210 40% 98%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive-foreground: 0 0% 100%;
   --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
+  --input: var(--border);
   --ring: 142 70% 40%;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+/* Base styles using CSS variables (no @apply) */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
 }

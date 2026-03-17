@@ -16,12 +16,19 @@ export default {
           300: "#4ade80",
           400: "#22c55e",
           500: "#16a34a",
-          600: "#15803d", // green-600
+          600: "#15803d",
           700: "#166534",
           800: "#14532d",
           900: "#052e16",
         },
+        // Theme-based colors (from theme.ts)
+        text: "var(--text)",
         background: "var(--background)",
+        tint: "var(--tint)",
+        icon: "var(--icon)",
+        tabIconDefault: "var(--tabIconDefault)",
+        tabIconSelected: "var(--tabIconSelected)",
+        // Semantic aliases
         foreground: "var(--foreground)",
         card: {
           DEFAULT: "var(--card)",
