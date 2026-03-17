@@ -4,7 +4,7 @@ import { db, schema } from "@/lib/db";
 import { eq, inArray, sql } from "drizzle-orm";
 import { verifyAccessToken, getUserById } from "@/lib/auth-core";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
-import { createPaymentIntent } from "@/lib/stripe";
+import { initializePaystackTransaction } from "@/lib/paystack";
 import { sendEmail } from "@/services/email-service";
 
 export const dynamic = 'force-dynamic';
@@ -16,16 +16,14 @@ interface CartItemInput {
 
 /**
  * POST /api/orders/checkout
- * Creates an order and a Stripe PaymentIntent, returns client secret.
+ * Creates an order and initializes a Paystack transaction.
  * Expects: { items: [{ productId, quantity }], shippingAddress?: Address }
- * Returns: { orderId, clientSecret, paymentIntentId }
+ * Returns: { orderId, authorizationUrl, reference, amount }
  */
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting: 10 checkouts per user per hour
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("access_token")?.value;
-    
     if (!accessToken) {
       return NextResponse.json({ error: "Authentication required. Please log in to checkout." }, { status: 401 });
     }
@@ -53,16 +51,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
-    // Fetch product details and validate inventory
+    // Fetch products and validate
     const productIds = items.map(i => i.productId);
     const products = await db.select().from(schema.products).where(inArray(schema.products.id, productIds)).execute();
-    
     const productMap = new Map(products.map(p => [p.id, p]));
-    
-    // Calculate total and validate stock
+
     let totalAmount = 0;
     const orderItems = [];
-    
+
     for (const item of items) {
       const product = productMap.get(item.productId);
       if (!product) {
@@ -74,10 +70,10 @@ export async function POST(request: NextRequest) {
       if (product.inventory < item.quantity) {
         return NextResponse.json({ error: `Insufficient inventory for ${product.title}` }, { status: 400 });
       }
-      
+
       const subtotal = Number(product.price) * item.quantity;
       totalAmount += subtotal;
-      
+
       orderItems.push({
         productId: product.id,
         quantity: item.quantity,
@@ -86,7 +82,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Basic shipping address validation (could be improved)
     const address = shippingAddress || {
       fullName: user[0].fullName || "",
       address: "",
@@ -96,12 +91,12 @@ export async function POST(request: NextRequest) {
       country: "USA",
     };
 
-    // Create order in pending status
+    // Create order (pending)
     const [order] = await db.insert(schema.orders).values({
       customerId: user[0].id,
       totalAmount,
       shippingAddress: address,
-      status: "pending", // will become 'processing' after payment
+      status: "pending",
     }).returning();
 
     // Create order items
@@ -112,39 +107,43 @@ export async function POST(request: NextRequest) {
       }))
     );
 
-    // Create a payment record (preliminary)
+    // Create payment record (pending, gateway = paystack)
     const [payment] = await db.insert(schema.payments).values({
       userId: user[0].id,
       amount: totalAmount,
       currency: "usd",
       paymentMethod: "card",
-      paymentGateway: "stripe",
-      transactionId: `pi_${order.id}`, // placeholder, will be replaced with real PI ID
+      paymentGateway: "paystack",
+      transactionId: `txn_${order.id}`, // temporary; will be replaced with Paystack reference
       status: "pending",
       metadata: { orderId: order.id },
     }).returning();
 
-    // Create Stripe PaymentIntent
-    const intent = await createPaymentIntent(totalAmount, "usd", {
-      userId: user[0].id,
-      type: "order",
-      orderId: order.id,
-      paymentId: payment.id,
-    });
+    // Initialize Paystack transaction
+    const paystackData = await initializePaystackTransaction(
+      user[0].email,
+      totalAmount,
+      "usd",
+      {
+        userId: user[0].id,
+        type: "order",
+        orderId: order.id,
+        paymentId: payment.id,
+      }
+    );
 
-    // Update payment with real Stripe PaymentIntent ID
-    await db.update(schema.payments).set({ transactionId: intent.id }).where(eq(schema.payments.id, payment.id));
-    await db.update(schema.orders).set({ paymentId: intent.id }).where(eq(schema.orders.id, order.id));
+    // Update payment and order with Paystack reference
+    await db.update(schema.payments).set({ transactionId: paystackData.reference }).where(eq(schema.payments.id, payment.id));
+    await db.update(schema.orders).set({ paymentId: paystackData.reference }).where(eq(schema.orders.id, order.id));
 
-    // Return client secret to frontend
     return NextResponse.json({
       orderId: order.id,
-      clientSecret: intent.client_secret!,
-      paymentIntentId: intent.id,
+      authorizationUrl: paystackData.authorization_url,
+      reference: paystackData.reference,
       amount: totalAmount,
     });
   } catch (error: any) {
     console.error("Checkout error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });
   }
 }

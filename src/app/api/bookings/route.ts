@@ -4,7 +4,7 @@ import { z } from "zod";
 import { db, schema } from "@/lib/db";
 import { eq, and, sql } from "drizzle-orm";
 import { verifyAccessToken, getUserById } from "@/lib/auth-core";
-import { createPaymentIntent } from "@/lib/stripe";
+import { initializePaystackTransaction } from "@/lib/paystack";
 import { sendEmail } from "@/services/email-service";
 
 export const dynamic = 'force-dynamic';
@@ -18,19 +18,16 @@ const createBookingSchema = z.object({
 
 /**
  * POST /api/bookings
- * Create a new booking with pending payment, returns PaymentIntent client secret.
+ * Create a new booking with pending payment, returns Paystack transaction data.
  */
 export async function POST(request: NextRequest) {
   try {
-    // Get user from cookies
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("access_token")?.value;
-    
     if (!accessToken) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    // Verify token
     const payload = await verifyAccessToken(accessToken);
     if (!payload) {
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
@@ -46,19 +43,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Account disabled" }, { status: 403 });
     }
 
-    // Validate request body
     const body = await request.json();
     const validated = createBookingSchema.parse(body);
 
-    // Fetch office space and validate active
     const spaces = await db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.id, validated.spaceId)).limit(1).execute();
     const space = spaces[0];
     if (!space || !space.isActive) {
       return NextResponse.json({ error: "Office space not found or inactive" }, { status: 404 });
     }
 
-    // Check for overlapping confirmed bookings
-    // Overlap condition: existing.start < new.end AND existing.end > new.start
+    // Check overlapping confirmed bookings
     const overlapping = await db.select().from(schema.bookings).where(
       and(
         eq(schema.bookings.spaceId, validated.spaceId),
@@ -72,7 +66,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Selected dates conflict with an existing booking" }, { status: 409 });
     }
 
-    // Calculate total price based on duration
+    // Calculate price
     const startDate = new Date(validated.startDate);
     const endDate = new Date(validated.endDate);
     const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -86,45 +80,50 @@ export async function POST(request: NextRequest) {
     }
     const totalPrice = pricePerDay * days;
 
-    // Create booking with pending status
+    // Create booking (pending)
     const [booking] = await db.insert(schema.bookings).values({
       customerId: customer.id,
       spaceId: validated.spaceId,
       startDate: startDate,
       endDate: endDate,
+      guestCount: validated.guestCount,
       totalPrice,
       status: "pending",
     }).returning();
 
-    // Create a preliminary payment record
+    // Create payment record (pending, Paystack)
     const [payment] = await db.insert(schema.payments).values({
       userId: customer.id,
       amount: totalPrice,
       currency: "usd",
       paymentMethod: "card",
-      paymentGateway: "stripe",
-      transactionId: `pi_${booking.id}`,
+      paymentGateway: "paystack",
+      transactionId: `txn_${booking.id}`,
       status: "pending",
       metadata: { bookingId: booking.id },
     }).returning();
 
-    // Create Stripe PaymentIntent
-    const intent = await createPaymentIntent(totalPrice, "usd", {
-      userId: customer.id,
-      type: "booking",
-      bookingId: booking.id,
-      paymentId: payment.id,
-    });
+    // Initialize Paystack transaction
+    const paystackData = await initializePaystackTransaction(
+      customer.email,
+      totalPrice,
+      "usd",
+      {
+        userId: customer.id,
+        type: "booking",
+        bookingId: booking.id,
+        paymentId: payment.id,
+      }
+    );
 
-    // Update payment and booking with PI ID
-    await db.update(schema.payments).set({ transactionId: intent.id }).where(eq(schema.payments.id, payment.id));
-    await db.update(schema.bookings).set({ paymentId: intent.id }).where(eq(schema.bookings.id, booking.id));
+    // Update references
+    await db.update(schema.payments).set({ transactionId: paystackData.reference }).where(eq(schema.payments.id, payment.id));
+    await db.update(schema.bookings).set({ paymentId: paystackData.reference }).where(eq(schema.bookings.id, booking.id));
 
-    // Return client secret for frontend to complete payment
     return NextResponse.json({
       booking,
-      clientSecret: intent.client_secret!,
-      paymentIntentId: intent.id,
+      authorizationUrl: paystackData.authorization_url,
+      reference: paystackData.reference,
       amount: totalPrice,
     });
   } catch (error: any) {

@@ -23,14 +23,14 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold mb-2">3. Sharing of Information</h2>
             <p>We do not sell your personal data. We may share information with:</p>
             <ul className="list-disc ml-6 space-y-1">
-              <li>Service providers (Stripe, SendGrid, Supabase) who assist in operations</li>
+              <li>Service providers (Paystack, Resend, Supabase) who assist in operations</li>
               <li>Other users only as necessary for transactions (e.g., sharing your name and address with a seller for delivery)</li>
               <li>Law enforcement or regulators when required by law</li>
             </ul>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">4. Data Security</h2>
-            <p>We implement industry-standard security measures including encryption (TLS/SSL), hashed passwords, and role-based access controls. Payment data is handled by Stripe and never stored on our servers in full. Despite our efforts, no system is 100% secure; we cannot guarantee absolute security.</p>
+            <p>We implement industry-standard security measures including encryption (TLS/SSL), hashed passwords, and role-based access controls. Payment data is handled by Paystack and never stored on our servers in full. Despite our efforts, no system is 100% secure; we cannot guarantee absolute security.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">5. Cookies and Tracking</h2>

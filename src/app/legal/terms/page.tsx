@@ -22,7 +22,7 @@ export default function TermsPage() {
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">5. Payments</h2>
-            <p>All payments are processed through Stripe. By using the payment service, you agree to Stripe's terms of service. Storeffice does not store full credit card details. Refunds are subject to our refund policy and Stripe's capabilities.</p>
+            <p>All payments are processed through Paystack. By using the payment service, you agree to Paystack's terms of service. Storeffice does not store full credit card details. Refunds are subject to our refund policy and Paystack's capabilities.</p>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">6. Prohibited Uses</h2>

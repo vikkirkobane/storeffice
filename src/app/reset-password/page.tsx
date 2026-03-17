@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token") || "";
@@ -37,22 +37,26 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4">
       <div className="max-w-md w-full space-y-8">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Set new password</h2>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">Set new password</h2>
         <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
-          {error && <div className="text-red-600 text-sm">{error}</div>}
-          <Input name="password" type="password" required value={password} onChange={e => setPassword(e.target.value)}
-            className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="New password" />
-          <Input name="confirm" type="password" required value={confirm} onChange={e => setConfirm(e.target.value)}
-            className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Confirm new password" />
+          {error && <div className="text-destructive text-sm">{error}</div>}
+          <Input name="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="New password" />
+          <Input name="confirm" type="password" required value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Confirm new password" />
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Resetting..." : "Reset password"}
           </Button>
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
