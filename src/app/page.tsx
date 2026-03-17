@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,9 @@ import {
   Star,
   TrendingUp,
   Clock,
-  Award
+  Award,
+  Menu,
+  X
 } from "lucide-react";
 import Link from "next/link";
 
@@ -73,14 +76,70 @@ const steps = [
 const testimonials = [
   { name: "Sarah K.", role: "Startup Founder", text: "Storeffice made finding our first office effortless. The booking process was smooth and the space was exactly what we needed." },
   { name: "James M.", role: "Logistics Manager", text: "We've cut our storage costs by 30% using Storeffice. The platform is intuitive and the support team is outstanding." },
+  { name: "Amina N.", role: "Freelancer", text: "The product marketplace is a game-changer. I can order all my office supplies in one click." },
 ];
 
 export default function HomePage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <main className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <Building2 className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <span className="font-bold text-xl text-foreground">Storeffice</span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-8">
+              <Link href="/spaces" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Spaces</Link>
+              <Link href="/storage" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Storage</Link>
+              <Link href="/products" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Products</Link>
+              <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">About</Link>
+              <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Contact</Link>
+            </nav>
+
+            <div className="hidden md:flex items-center gap-4">
+              <Button asChild variant="ghost" size="sm">Sign in</Button>
+              <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Link href="/register">Get Started</Link>
+              </Button>
+            </div>
+
+            {/* Mobile menu button */}
+            <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden py-4 border-t border-border/40">
+              <nav className="flex flex-col gap-4">
+                <Link href="/spaces" className="text-sm font-medium text-muted-foreground hover:text-foreground">Spaces</Link>
+                <Link href="/storage" className="text-sm font-medium text-muted-foreground hover:text-foreground">Storage</Link>
+                <Link href="/products" className="text-sm font-medium text-muted-foreground hover:text-foreground">Products</Link>
+                <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground">About</Link>
+                <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-foreground">Contact</Link>
+                <div className="flex flex-col gap-2 pt-2">
+                  <Button asChild variant="outline" size="sm">Sign in</Button>
+                  <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    <Link href="/register">Get Started</Link>
+                  </Button>
+                </div>
+              </nav>
+            </div>
+          )}
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-20 lg:py-32">
-        {/* Decorative background elements */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-0 right-0 -mr-20 -mt-20 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute bottom-0 left-0 -ml-20 -mb-20 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
@@ -127,7 +186,6 @@ export default function HomePage() {
             </div>
 
             <div className="relative lg:h-[600px] flex items-center justify-center">
-              {/* Hero image placeholder with gradient and floating elements */}
               <div className="relative w-full h-96 lg:h-full rounded-3xl bg-gradient-to-br from-primary/20 via-emerald-100/30 to-teal-100/30 border border-primary/20 shadow-2xl overflow-hidden">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center space-y-4 p-8">
@@ -139,7 +197,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 {/* Floating UI elements */}
-                <div className="absolute top-8 right-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-xl p-4 shadow-lg border border-border animate-fade-in-up">
+                <div className="absolute top-8 right-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-xl p-4 shadow-lg border border-border">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
                       <CheckCircle2 className="h-6 w-6 text-green-600" />
@@ -150,7 +208,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-                <div className="absolute bottom-8 left-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-xl p-4 shadow-lg border border-border animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                <div className="absolute bottom-8 left-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-xl p-4 shadow-lg border border-border">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
                       <TrendingUp className="h-6 w-6 text-primary" />
@@ -167,20 +225,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trusted By / Social Proof */}
-      <section className="py-12 bg-muted/30 border-y border-border">
+      {/* Trusted By */}
+      <section className="py-8 bg-muted/30 border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm font-medium text-muted-foreground mb-6">TRUSTED BY INNOVATIVE TEAMS AT</p>
+          <p className="text-sm font-medium text-muted-foreground mb-4">TRUSTED BY INNOVATIVE TEAMS AT</p>
           <div className="flex flex-wrap justify-center items-center gap-12 opacity-60">
-            {/* Placeholder logos - text only for now */}
-            {['TechCorp', 'GreenStart', ' AfricaHub', 'NextGen', 'CloudSync'].map((brand) => (
-              <span key={brand} className="text-xl font-bold text-foreground">{brand}</span>
+            {['TechCorp', 'GreenStart', 'AfricaHub', 'NextGen', 'CloudSync'].map((brand) => (
+              <span key={brand} className="text-lg font-bold text-foreground">{brand}</span>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Grid */}
       <section className="py-20 lg:py-32 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 space-y-4">
@@ -217,7 +274,7 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {testimonials.map((t) => (
               <Card key={t.name} className="bg-card border-border">
                 <CardContent className="p-6 space-y-4">
@@ -296,7 +353,6 @@ export default function HomePage() {
                 Unified platform for office spaces, storage, and marketplace solutions. Powering businesses across Africa.
               </p>
               <div className="flex gap-4">
-                {/* Placeholder social icons */}
                 {['twitter', 'linkedin', 'github'].map((platform) => (
                   <a key={platform} href="#" className="text-muted-foreground hover:text-foreground transition-colors">
                     <span className="sr-only">{platform}</span>
