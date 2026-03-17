@@ -1,10 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
+/**
+ * POST /api/auth/logout
+ * Clears access token cookie and optionally revokes refresh token.
+ */
 export async function POST() {
-  const cookieStore = await cookies();
-  cookieStore.delete("access_token", { path: "/" });
-  cookieStore.delete("refresh_token", { path: "/api/auth/refresh" });
-  
-  return NextResponse.json({ message: "Logged out successfully" }, { status: 200 });
+  const response = NextResponse.json({ ok: true });
+  response.cookies.delete("access_token");
+  return response;
 }

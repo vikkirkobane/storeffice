@@ -1,143 +1,51 @@
 import { notFound } from "next/navigation";
-import { getStorageSpace } from "@/lib/actions/storage-spaces";
+import { db, schema } from "@/lib/db";
+import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { MapPin, Ruler, CheckCircle, Calendar, DollarSign } from "lucide-react";
 
-interface StorageDetailPageProps {
+interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function StorageDetailPage({ params }: StorageDetailPageProps) {
+export default async function StorageDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const space = await getStorageSpace(id);
-  
-  if (!space || !space.isActive) {
-    notFound();
-  }
+  const [space] = await db.select().from(schema.storageSpaces).where(eq(schema.storageSpaces.id, id)).limit(1);
+
+  if (!space) notFound();
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav className="mb-4">
-          <a href="/storage" className="text-primary hover:underline">← Back to all storage spaces</a>
-        </nav>
-
-        <div className="bg-white rounded-lg shadow p-6 md:p-8 space-y-6">
-          <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge>{space.storageType}</Badge>
-                {space.isAvailable ? (
-                  <Badge variant="default">Available</Badge>
-                ) : (
-                  <Badge variant="secondary">Rented</Badge>
-                )}
-              </div>
-              <h1 className="text-2xl font-bold">{space.title}</h1>
-              <p className="text-muted-foreground flex items-center gap-1 mt-1">
-                <MapPin className="h-4 w-4" />
-                {space.address}, {space.city}, {space.state} {space.zipCode}
-              </p>
-            </div>
-            
-            <div className="text-right">
-              <div className="text-2xl font-bold">${space.monthlyPrice}/mo</div>
-              {space.annualPrice && (
-                <div className="text-sm text-muted-foreground">${space.annualPrice}/year (10% off)</div>
-              )}
-            </div>
-          </div>
-
-          <Separator />
-
-          {space.description && (
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Description</h2>
-              <p className="whitespace-pre-line text-muted-foreground">{space.description}</p>
-            </div>
-          )}
-
-          <Separator />
-
-          {/* Dimensions */}
-          {(space.lengthFt || space.widthFt || space.heightFt) && (
-            <div>
-              <h2 className="text-lg font-semibold mb-3">Dimensions</h2>
-              <div className="grid grid-cols-3 gap-4">
-                {space.lengthFt && (
-                  <div className="bg-gray-50 p-4 rounded text-center">
-                    <div className="text-sm text-muted-foreground">Length</div>
-                    <div className="text-xl font-bold">{space.lengthFt} ft</div>
-                  </div>
-                )}
-                {space.widthFt && (
-                  <div className="bg-gray-50 p-4 rounded text-center">
-                    <div className="text-sm text-muted-foreground">Width</div>
-                    <div className="text-xl font-bold">{space.widthFt} ft</div>
-                  </div>
-                )}
-                {space.heightFt && (
-                  <div className="bg-gray-50 p-4 rounded text-center">
-                    <div className="text-sm text-muted-foreground">Height</div>
-                    <div className="text-xl font-bold">{space.heightFt} ft</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <Separator />
-
-          {/* Features */}
-          {space.features && space.features.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold mb-3">Features</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {space.features.map((feature) => (
-                  <div key={feature} className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="capitalize">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <Separator />
-
-          {/* Availability */}
+      <div className="max-w-6xl mx-auto px-4">
+        <Link href="/storage" className="text-indigo-600 hover:underline mb-4 inline-block">← Back to storage spaces</Link>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <h2 className="text-lg font-semibold mb-2">Availability</h2>
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4" />
-              <span>
-                {space.isAvailable 
-                  ? "Available now" 
-                  : "Currently rented. Contact owner for waitlist."}
-              </span>
-            </div>
+            {space.photos?.[0] ? (
+              <img src={space.photos[0]} alt={space.title} className="w-full h-96 object-cover rounded-lg" />
+            ) : (
+              <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                <span className="text-gray-400">No image</span>
+              </div>
+            )}
           </div>
-
-          <Separator />
-
-          {/* Contact / Rent CTA */}
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">Ready to rent this space?</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Contact the owner to discuss rental terms, schedule a tour, or proceed with booking.
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{space.title}</h1>
+            <p className="text-gray-600 mb-4">
+              {space.address}, {space.city}, {space.state} {space.zipCode}
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button size="lg" className="flex-1">
-                <DollarSign className="mr-2 h-4 w-4" />
-                Request Rental
-              </Button>
-              <Button variant="outline" size="lg" asChild>
-                <Link href="/dashboard">Log in to Manage</Link>
-              </Button>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {space.features?.map((f: string) => (
+                <span key={f} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">{f}</span>
+              ))}
             </div>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div><strong>Monthly:</strong> ${space.monthlyPrice}</div>
+              {space.annualPrice && <div><strong>Annual:</strong> ${space.annualPrice}</div>}
+              <div><strong>Type:</strong> {space.storageType}</div>
+              {space.lengthFt && <div><strong>Size:</strong> {space.lengthFt}' x {space.widthFt}' x {space.heightFt || '?'}'</div>}
+            </div>
+            <p className="text-gray-700 mb-6">{space.description}</p>
+            <Button size="lg">Rent This Space</Button>
           </div>
         </div>
       </div>

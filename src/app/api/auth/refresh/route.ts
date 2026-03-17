@@ -1,61 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifyRefreshToken, generateAccessToken, getUserById } from "@/lib/auth-core";
+import { verifyRefreshToken, generateAccessToken } from "@/lib/auth-core";
 
+/**
+ * POST /api/auth/refresh
+ * Body: { refreshToken: string }
+ * Returns: { accessToken }
+ */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await request.cookies;
-    const refreshToken = cookieStore.get("refresh_token")?.value;
-    
+    const { refreshToken } = await request.json();
     if (!refreshToken) {
-      return NextResponse.json(
-        { error: "No refresh token provided" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Refresh token required" }, { status: 400 });
     }
-    
+
     const payload = await verifyRefreshToken(refreshToken);
     if (!payload) {
-      return NextResponse.json(
-        { error: "Invalid refresh token" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid or expired refresh token" }, { status: 401 });
     }
-    
-    // Verify user still exists
-    const user = await getUserById(payload.userId);
-    if (!user || user.length === 0) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 401 }
-      );
-    }
-    
-    // Generate new access token
-    const accessToken = await generateAccessToken({
-      userId: user[0].id,
-      userType: user[0].userType || "customer",
-    });
-    
-    // Set new access token cookie (optional but convenient)
-    const responseCookies = await cookies();
-    responseCookies.set("access_token", accessToken, {
+
+    const accessToken = await generateAccessToken({ userId: payload.userId });
+
+    const response = NextResponse.json({ accessToken });
+    response.cookies.set("access_token", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 15 * 60,
+      maxAge: 60 * 15,
       path: "/",
     });
-    
-    return NextResponse.json(
-      { accessToken, user: user[0] },
-      { status: 200 }
-    );
+
+    return response;
   } catch (error) {
-    console.error("Refresh token error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("Refresh error:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
