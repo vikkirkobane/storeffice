@@ -28,7 +28,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 /**
- * Generate an access JWT (short-lived, e.g., 15 minutes)
+ * Generate an access JWT (short-lived, 15 minutes)
  */
 export async function generateAccessToken({ userId, userType }: { userId: string; userType?: string }): Promise<string> {
   return new SignJWT({ userId, userType })
@@ -52,7 +52,7 @@ export async function verifyAccessToken(token: string): Promise<{ userId: string
 }
 
 /**
- * Generate a refresh token (long-lived, stored in DB)
+ * Generate a refresh token (long-lived, 30 days)
  */
 export async function generateRefreshToken({ userId }: { userId: string }): Promise<string> {
   const token = crypto.randomBytes(32).toString("hex");
@@ -70,10 +70,10 @@ export async function generateRefreshToken({ userId }: { userId: string }): Prom
 }
 
 /**
- * Verify refresh token and return payload if valid
+ * Verify refresh token
  */
 export async function verifyRefreshToken(token: string): Promise<{ userId: string } | null> {
-  const result = await db.select().from(schema.refreshTokens).where(eq(schema.refreshTokens.token, token)).limit(1);
+  const result = await db.select().from(schema.refreshTokens).where(eq(schema.refreshTokens.token, token)).limit(1).execute();
   if (!result.length) return null;
 
   const rt = result[0];
@@ -103,7 +103,34 @@ export async function getUserByEmail(email: string) {
 }
 
 /**
- * Get current user from cookies (server component usage)
+ * Create a new user (registration)
+ */
+export async function createUser(data: {
+  email: string;
+  password: string;
+  fullName: string;
+  phone?: string;
+  userType?: string;
+}) {
+  const hashed = await hashPassword(data.password);
+  const id = crypto.randomUUID();
+
+  const [user] = await db.insert(schema.profiles).values({
+    id,
+    email: data.email,
+    fullName: data.fullName,
+    phone: data.phone || null,
+    userType: data.userType || "customer",
+    isVerified: false,
+    isActive: true,
+    passwordHash: hashed,
+  }).returning();
+
+  return user;
+}
+
+/**
+ * Get current user from cookies (server component)
  */
 export async function getServerUser() {
   const cookieStore = await cookies();
