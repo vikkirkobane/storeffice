@@ -2,17 +2,53 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import ThemeToggle from "@/components/theme-toggle";
+import { Separator } from "@/components/ui/separator";
+import { Mail, Phone, MapPin, Building2 } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Storeffice - Office Spaces & Marketplace",
-  description: "Book office spaces, rent storage, and shop products in one unified platform.",
-  icons: {
-    icon: "/favicon.png",
-  },
+  title: "Storeffice — Office Spaces, Storage & Marketplace",
+  description: "Discover, book, and manage office spaces, storage, and products in one unified platform. Trusted by businesses across Africa and beyond.",
 };
+
+const navLinks = [
+  { href: "/spaces", label: "Spaces" },
+  { href: "/storage", label: "Storage" },
+  { href: "/products", label: "Products" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+
+const socialLinks = [
+  { icon: "twitter", label: "Twitter", href: "#" },
+  { icon: "linkedin", label: "LinkedIn", href: "#" },
+  { icon: "github", label: "GitHub", href: "#" },
+  { icon: "instagram", label: "Instagram", href: "#" },
+];
+
+function SocialIcon({ icon }: { icon: string }) {
+  switch (icon) {
+    case "twitter":
+      return (
+        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+      );
+    case "linkedin":
+      return (
+        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+      );
+    case "github":
+      return (
+        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+      );
+    case "instagram":
+      return (
+        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+      );
+    default:
+      return null;
+  }
+}
 
 export default function RootLayout({
   children,
@@ -23,42 +59,107 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} bg-background text-foreground`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <nav className="bg-white dark:bg-gray-900 shadow-sm border-b">
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+
+          {/* Header */}
+          <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between h-16">
-                <div className="flex items-center">
-                  <a href="/" className="flex-shrink-0 flex items-center">
-                    <img src="/storeffice-logo.png" alt="Storeffice" className="h-8 w-auto mr-2" />
-                    <span className="font-bold text-xl text-green-600">Storeffice</span>
-                  </a>
-                  <div className="hidden md:ml-6 md:flex md:space-x-4">
-                    <a href="/spaces" className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400">Spaces</a>
-                    <a href="/storage" className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400">Storage</a>
-                    <a href="/products" className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400">Products</a>
-                    <a href="/about" className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400">About</a>
-                    <a href="/contact" className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400">Contact</a>
+              <div className="flex h-16 items-center justify-between">
+                <a href="/" className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                    <Building2 className="h-5 w-5 text-primary-foreground" />
                   </div>
+                  <span className="font-bold text-xl text-foreground">Storeffice</span>
+                </a>
+
+                {/* Desktop Nav */}
+                <nav className="hidden md:flex items-center gap-8">
+                  {navLinks.map((link) => (
+                    <a key={link.href} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                      {link.label}
+                    </a>
+                  ))}
+                </nav>
+
+                <div className="hidden md:flex items-center gap-4">
+                  <a href="/login" className="text-sm font-medium text-muted-foreground hover:text-primary">Sign in</a>
+                  <a href="/register" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">Get Started</a>
                 </div>
-                <div className="hidden md:flex md:items-center md:space-x-4">
-                  <a href="/login" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400">Sign in</a>
-                  <a href="/register" className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">Get started</a>
-                </div>
-                <div className="md:hidden flex items-center space-x-2">
-                  <ThemeToggle />
-                  {/* Mobile menu button */}
-                  <button className="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 p-2">
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  </button>
+
+                {/* Mobile menu (details/summary - no JS) */}
+                <div className="md:hidden">
+                  <details>
+                    <summary className="cursor-pointer p-2">☰</summary>
+                    <nav className="flex flex-col gap-4 p-4 border-t border-border/40">
+                      {navLinks.map((link) => (
+                        <a key={link.href} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-primary">
+                          {link.label}
+                        </a>
+                      ))}
+                      <div className="flex flex-col gap-2 pt-2">
+                        <a href="/login" className="text-sm font-medium text-muted-foreground hover:text-primary">Sign in</a>
+                        <a href="/register" className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">Get Started</a>
+                      </div>
+                    </nav>
+                  </details>
                 </div>
               </div>
             </div>
-          </nav>
-          {children}
-          <footer className="bg-white dark:bg-gray-900 border-t mt-auto">
-            <div className="max-w-7xl mx-auto px-4 py-6 text-center text-gray-500 dark:text-gray-400 text-sm">
-              © {new Date().getFullYear()} Storeffice. All rights reserved.
+          </header>
+
+          <main id="main-content">{children}</main>
+
+          {/* Footer */}
+          <footer className="bg-background border-t py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
+                <div className="space-y-4">
+                  <h3 className="font-bold text-xl text-foreground">Storeffice</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
+                    Unified platform for office spaces, storage, and marketplace solutions. Powering businesses across Africa.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4 text-foreground">Product</h4>
+                  <ul className="space-y-3 text-sm text-muted-foreground">
+                    <li><a href="/spaces" className="hover:text-foreground transition-colors">Spaces</a></li>
+                    <li><a href="/storage" className="hover:text-foreground transition-colors">Storage</a></li>
+                    <li><a href="/products" className="hover:text-foreground transition-colors">Products</a></li>
+                    <li><a href="/pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
+                    <li><a href="/api" className="hover:text-foreground transition-colors">API</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4 text-foreground">Company</h4>
+                  <ul className="space-y-3 text-sm text-muted-foreground">
+                    <li><a href="/about" className="hover:text-foreground transition-colors">About</a></li>
+                    <li><a href="/contact" className="hover:text-foreground transition-colors">Contact</a></li>
+                    <li><a href="/careers" className="hover:text-foreground transition-colors">Careers</a></li>
+                    <li><a href="/legal/privacy" className="hover:text-foreground transition-colors">Privacy</a></li>
+                    <li><a href="/legal/terms" className="hover:text-foreground transition-colors">Terms</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4 text-foreground">Contact</h4>
+                  <ul className="space-y-3 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-primary" /> support@storeffice.com
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-primary" /> +1 (555) 123-4567
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" /> Nairobi, Kenya
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <Separator className="my-8" />
+              <div className="text-center text-sm text-muted-foreground">
+                © {new Date().getFullYear()} Storeffice. All rights reserved.
+              </div>
             </div>
           </footer>
         </ThemeProvider>

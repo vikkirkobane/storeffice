@@ -14,19 +14,10 @@ import {
   Globe, 
   CheckCircle2, 
   ArrowRight, 
-  Mail, 
-  Phone, 
-  MapPin,
-  Star,
-  TrendingUp,
   Clock,
   Award,
-  Menu,
-  X,
-  Linkedin,
-  Twitter,
-  Github,
-  Instagram
+  Star,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -93,64 +84,10 @@ const trustBadges = [
 ];
 
 export default function HomePage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Mobile menu state is now handled by SiteHeader, not needed here
 
   return (
-    <main className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="font-bold text-xl text-foreground">Storeffice</span>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-8">
-              <Link href="/spaces" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Spaces</Link>
-              <Link href="/storage" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Storage</Link>
-              <Link href="/products" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Products</Link>
-              <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">About</Link>
-              <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Contact</Link>
-            </nav>
-
-            <div className="hidden md:flex items-center gap-4">
-              <Button asChild variant="ghost" size="sm">Sign in</Button>
-              <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <Link href="/register">Get Started</Link>
-              </Button>
-            </div>
-
-            {/* Mobile menu button */}
-            <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
-
-          {/* Mobile Navigation */}
-          {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-border/40">
-              <nav className="flex flex-col gap-4">
-                <Link href="/spaces" className="text-sm font-medium text-muted-foreground hover:text-primary">Spaces</Link>
-                <Link href="/storage" className="text-sm font-medium text-muted-foreground hover:text-primary">Storage</Link>
-                <Link href="/products" className="text-sm font-medium text-muted-foreground hover:text-primary">Products</Link>
-                <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-primary">About</Link>
-                <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-primary">Contact</Link>
-                <div className="flex flex-col gap-2 pt-2">
-                  <Button asChild variant="outline" size="sm">Sign in</Button>
-                  <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    <Link href="/register">Get Started</Link>
-                  </Button>
-                </div>
-              </nav>
-            </div>
-          )}
-        </div>
-      </header>
-
+    <main className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-20 lg:py-32">
         <div className="absolute inset-0 -z-10">
@@ -369,71 +306,6 @@ export default function HomePage() {
           <p className="mt-6 text-sm opacity-80">No credit card required. 14-day free trial.</p>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-background border-t py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-            <div className="space-y-4">
-              <h3 className="font-bold text-xl text-foreground">Storeffice</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-                Unified platform for office spaces, storage, and marketplace solutions. Powering businesses across Africa.
-              </p>
-              <div className="flex gap-4">
-                {[
-                  { icon: Twitter, label: 'Twitter' },
-                  { icon: Linkedin, label: 'LinkedIn' },
-                  { icon: Github, label: 'GitHub' },
-                  { icon: Instagram, label: 'Instagram' }
-                ].map((social) => (
-                  <a key={social.label} href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                    <span className="sr-only">{social.label}</span>
-                    <social.icon className="h-5 w-5" />
-                  </a>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-foreground">Product</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li><Link href="/spaces" className="hover:text-foreground transition-colors">Spaces</Link></li>
-                <li><Link href="/storage" className="hover:text-foreground transition-colors">Storage</Link></li>
-                <li><Link href="/products" className="hover:text-foreground transition-colors">Products</Link></li>
-                <li><Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link></li>
-                <li><Link href="/api" className="hover:text-foreground transition-colors">API</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-foreground">Company</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:text-foreground transition-colors">About</Link></li>
-                <li><Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link></li>
-                <li><Link href="/careers" className="hover:text-foreground transition-colors">Careers</Link></li>
-                <li><Link href="/legal/privacy" className="hover:text-foreground transition-colors">Privacy</Link></li>
-                <li><Link href="/legal/terms" className="hover:text-foreground transition-colors">Terms</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4 text-foreground">Contact</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-primary" /> support@storeffice.com
-                </li>
-                <li className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-primary" /> +1 (555) 123-4567
-                </li>
-                <li className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" /> Nairobi, Kenya
-                </li>
-              </ul>
-            </div>
-          </div>
-          <Separator className="my-8" />
-          <div className="text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Storeffice. All rights reserved.
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }
