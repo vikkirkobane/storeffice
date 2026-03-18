@@ -332,7 +332,7 @@ export default function HomePage() {
         <div className="relative">
           <div className="flex animate-marquee whitespace-nowrap">
             {[...techStack, ...techStack].map((tech, i) => (
-              <span key={i} className="mx-8 text-4xl font-bold text-slate-800 hover:text-slate-600 transition-colors">
+              <span key={i} className="mx-8 text-4xl font-bold text-slate-300 hover:text-slate-200 transition-colors">
                 {tech}
               </span>
             ))}
@@ -379,7 +379,7 @@ export default function HomePage() {
           {/* Bento Grid Layout */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Large feature cards */}
-            <Card className="md:col-span-2 bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
+            <Card className="md:col-span-2 bg-transparent bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="p-8 relative z-10">
                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -395,7 +395,7 @@ export default function HomePage() {
               </div>
             </Card>
 
-            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
+            <Card className="bg-transparent bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="p-8 relative z-10">
                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -406,7 +406,7 @@ export default function HomePage() {
               </div>
             </Card>
 
-            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
+            <Card className="bg-transparent bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="p-8 relative z-10">
                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -417,7 +417,7 @@ export default function HomePage() {
               </div>
             </Card>
 
-            <Card className="md:col-span-2 bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
+            <Card className="bg-transparent bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="p-8 relative z-10">
                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -433,7 +433,7 @@ export default function HomePage() {
               </div>
             </Card>
 
-            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
+            <Card className="bg-transparent bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="p-8 relative z-10">
                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -444,7 +444,7 @@ export default function HomePage() {
               </div>
             </Card>
 
-            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
+            <Card className="bg-transparent bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-white/10 backdrop-blur-sm group hover:border-emerald-500/30 transition-all duration-300 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="p-8 relative z-10">
                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -475,7 +475,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((t, idx) => (
-              <Card key={idx} className="bg-slate-800/50 border-white/10 backdrop-blur-sm hover:border-emerald-500/30 transition-all duration-300 group">
+              <Card key={idx} className="bg-transparent bg-slate-800/50 border-white/10 backdrop-blur-sm hover:border-emerald-500/30 transition-all duration-300 group">
                 <CardContent className="p-8 space-y-6">
                   <div className="flex gap-1">
                     {[...Array(t.rating)].map((_, i) => (
