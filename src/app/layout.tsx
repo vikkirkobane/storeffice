@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Separator } from "@/components/ui/separator";
 import { Mail, Phone, MapPin, Building2 } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -156,7 +155,7 @@ export default function RootLayout({
                   </ul>
                 </div>
               </div>
-              <Separator className="my-8" />
+              <hr className="my-8 border-slate-700" />
               <div className="text-center text-sm text-muted-foreground">
                 © {new Date().getFullYear()} Storeffice. All rights reserved.
               </div>
