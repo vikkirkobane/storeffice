@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { CartProvider } from "@/context/CartContext";
+import { Mail, Phone, MapPin, Building2 } from "lucide-react";
 import Image from "next/image";
 import { Toaster } from "sonner";
+import MobileNav from "@/components/mobile-nav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -66,56 +68,58 @@ export default function RootLayout({
           </a>
 
           {/* Header */}
-          {/* Header */}
           <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex h-16 items-center justify-between">
-                <a href="/" className="flex items-center gap-2">
+                {/* Logo */}
+                <Link href="/" className="flex items-center gap-2 shrink-0">
                   <div className="h-10 w-10 relative flex items-center justify-center">
                     <Image
                       src="/storeffice-logo.png"
                       alt="Storeffice Logo"
                       width={40}
                       height={40}
-                      style={{ width: 40, height: 'auto' }}
+                      style={{ width: 40, height: "auto" }}
                       className="object-contain"
                       priority
                     />
                   </div>
-                  <span className="font-bold text-xl text-foreground">Storeffice</span>
-                </a>
+                  <span className="font-bold text-xl text-foreground hidden sm:inline-block">
+                    Storeffice
+                  </span>
+                </Link>
 
-                {/* Desktop Nav */}
-                <nav className="hidden md:flex items-center gap-8">
+                {/* Desktop Navigation */}
+                <nav className="hidden md:flex items-center gap-1 lg:gap-2">
                   {navLinks.map((link) => (
-                    <a key={link.href} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors rounded-md hover:bg-accent/50"
+                    >
                       {link.label}
                     </a>
                   ))}
                 </nav>
 
-                <div className="hidden md:flex items-center gap-4">
-                  <a href="/login" className="text-sm font-medium text-muted-foreground hover:text-primary">Sign in</a>
-                  <a href="/register" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">Get Started</a>
+                {/* Desktop Auth Buttons */}
+                <div className="hidden md:flex items-center gap-3">
+                  <Link
+                    href="/login"
+                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-2"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
+                  >
+                    Get Started
+                  </Link>
                 </div>
 
-                {/* Mobile menu (details/summary - no JS) */}
-                <div className="md:hidden">
-                  <details>
-                    <summary className="cursor-pointer p-2">☰</summary>
-                    <nav className="flex flex-col gap-4 p-4 border-t border-border/40">
-                      {navLinks.map((link) => (
-                        <a key={link.href} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-primary">
-                          {link.label}
-                        </a>
-                      ))}
-                      <div className="flex flex-col gap-2 pt-2">
-                        <a href="/login" className="text-sm font-medium text-muted-foreground hover:text-primary">Sign in</a>
-                        <a href="/register" className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">Get Started</a>
-                      </div>
-                    </nav>
-                  </details>
-                </div>
+                {/* Mobile Navigation Trigger */}
+                <MobileNav />
               </div>
             </div>
           </header>
@@ -142,27 +146,25 @@ export default function RootLayout({
                     <li><a href="/api" className="hover:text-foreground transition-colors">API</a></li>
                   </ul>
                 </div>
-                <div>
+                <div className="space-y-3 text-sm text-muted-foreground">
                   <h4 className="font-semibold mb-4 text-foreground">Company</h4>
-                  <ul className="space-y-3 text-sm text-muted-foreground">
-                    <li><a href="/about" className="hover:text-foreground transition-colors">About</a></li>
-                    <li><a href="/contact" className="hover:text-foreground transition-colors">Contact</a></li>
-                    <li><a href="/careers" className="hover:text-foreground transition-colors">Careers</a></li>
-                    <li><a href="/legal/privacy" className="hover:text-foreground transition-colors">Privacy</a></li>
-                    <li><a href="/legal/terms" className="hover:text-foreground transition-colors">Terms</a></li>
-                  </ul>
+                  <li><a href="/about" className="hover:text-foreground transition-colors">About</a></li>
+                  <li><a href="/contact" className="hover:text-foreground transition-colors">Contact</a></li>
+                  <li><a href="/careers" className="hover:text-foreground transition-colors">Careers</a></li>
+                  <li><a href="/legal/privacy" className="hover:text-foreground transition-colors">Privacy</a></li>
+                  <li><a href="/legal/terms" className="hover:text-foreground transition-colors">Terms</a></li>
                 </div>
                 <div>
                   <h4 className="font-semibold mb-4 text-foreground">Contact</h4>
                   <ul className="space-y-3 text-sm text-muted-foreground">
                     <li className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-primary" /> support@storeffice.com
+                      <Mail className="h-4 w-4 text-primary flex-shrink-0" /> support@storeffice.com
                     </li>
                     <li className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-primary" /> +1 (555) 123-4567
+                      <Phone className="h-4 w-4 text-primary flex-shrink-0" /> +1 (555) 123-4567
                     </li>
                     <li className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-primary" /> Nairobi, Kenya
+                      <MapPin className="h-4 w-4 text-primary flex-shrink-0" /> Nairobi, Kenya
                     </li>
                   </ul>
                 </div>
