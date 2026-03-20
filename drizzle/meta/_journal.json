@@ -8,6 +8,13 @@
       "when": 1773515000658,
       "tag": "0000_many_starbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774032426201,
+      "tag": "0001_misty_skreet",
+      "breakpoints": true
     }
   ]
 }
