@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { db, schema } from "@/lib/db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 import { verifyAccessToken } from "@/lib/auth-core";
 
 export async function createStorageSpace(data: any) {
@@ -110,30 +110,43 @@ export async function listStorageSpaces(params: {
   page: number;
   limit: number;
 }) {
-  let query = db.select().from(schema.storageSpaces).where(sql`is_active = true`);
+  const conditions = [eq(schema.storageSpaces.isActive, true)];
 
   if (params.city) {
-    query = query.where(sql`lower(city) = lower(${params.city})`);
+    conditions.push(sql`lower(${schema.storageSpaces.city}) = lower(${params.city})`);
   }
   if (params.storageType) {
-    query = query.where(sql`storage_type = ${params.storageType}`);
+    conditions.push(eq(schema.storageSpaces.storageType, params.storageType as any));
   }
   if (params.minPrice !== undefined) {
-    query = query.where(sql`monthly_price >= ${params.minPrice}`);
+    conditions.push(sql`${schema.storageSpaces.monthlyPrice} >= ${params.minPrice}`);
   }
   if (params.maxPrice !== undefined) {
-    query = query.where(sql`monthly_price <= ${params.maxPrice}`);
+    conditions.push(sql`${schema.storageSpaces.monthlyPrice} <= ${params.maxPrice}`);
   }
 
-  const spaces = await query.limit(params.limit).execute();
-  const total = await db.select({ count: sql`count(*)` }).from(schema.storageSpaces).where(sql`is_active = true`).execute();
+  const offset = (params.page - 1) * params.limit;
+
+  const spaces = await db.select()
+    .from(schema.storageSpaces)
+    .where(and(...conditions))
+    .limit(params.limit)
+    .offset(offset)
+    .execute();
+
+  const totalResult = await db.select({ count: sql<number>`count(*)` })
+    .from(schema.storageSpaces)
+    .where(and(...conditions))
+    .execute();
+
+  const totalCount = Number(totalResult[0].count);
 
   return {
     spaces,
     pagination: {
-      total: Number(total[0].count),
+      total: totalCount,
       page: params.page,
-      pages: Math.ceil(Number(total[0].count) / params.limit),
+      pages: Math.ceil(totalCount / params.limit),
       limit: params.limit,
     },
   };

@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { db, schema } from "@/lib/db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 import { verifyAccessToken } from "@/lib/auth-core";
 
 export async function createOfficeSpace(data: any) {
@@ -106,23 +106,34 @@ export async function listOfficeSpaces(params: {
   page: number;
   limit: number;
 }) {
-  // Simplified: return all active spaces
-  let query = db.select().from(schema.officeSpaces).where(sql`is_active = true`);
+  const conditions = [eq(schema.officeSpaces.isActive, true)];
 
   if (params.city) {
-    query = query.where(sql`lower(city) = lower(${params.city})`);
+    conditions.push(sql`lower(${schema.officeSpaces.city}) = lower(${params.city})`);
   }
-  // Additional filters can be added similarly
 
-  const spaces = await query.limit(params.limit).execute();
-  const total = await db.select({ count: sql`count(*)` }).from(schema.officeSpaces).where(sql`is_active = true`).execute();
+  const offset = (params.page - 1) * params.limit;
+
+  const spaces = await db.select()
+    .from(schema.officeSpaces)
+    .where(and(...conditions))
+    .limit(params.limit)
+    .offset(offset)
+    .execute();
+
+  const totalResult = await db.select({ count: sql<number>`count(*)` })
+    .from(schema.officeSpaces)
+    .where(and(...conditions))
+    .execute();
+
+  const totalCount = Number(totalResult[0].count);
 
   return {
     spaces,
     pagination: {
-      total: Number(total[0].count),
+      total: totalCount,
       page: params.page,
-      pages: Math.ceil(Number(total[0].count) / params.limit),
+      pages: Math.ceil(totalCount / params.limit),
       limit: params.limit,
     },
   };
