@@ -39,7 +39,7 @@ const techStack = [
 const metrics = [
   { label: "Total Addressable Market", value: "$37B+", icon: BarChart3, color: "text-emerald-400" },
   { label: "Platform Uptime", value: "99.99%", icon: Server, color: "text-teal-400" },
-  { label: "Transactions Processed", value: "₦2.4M+", icon: CreditCard, color: "text-cyan-400" },
+  { label: "Transactions Processed", value: "KSh 2.4M+", icon: CreditCard, color: "text-cyan-400" },
   { label: "Active Listings", value: "5,000+", icon: Boxes, color: "text-indigo-400" },
 ];
 
@@ -289,7 +289,7 @@ export default function HomePage() {
                 </div>
                 <div className="p-6 grid gap-4">
                   <div className="h-32 rounded-xl bg-gradient-to-r from-teal-900/40 to-cyan-900/40 border border-teal-500/20 p-4 flex flex-col justify-end">
-                    <div className="text-3xl font-bold text-white mb-1">₦ 12,450,000</div>
+                    <div className="text-3xl font-bold text-white mb-1">KSh 12,450,000</div>
                     <div className="text-teal-400 text-sm font-medium">+14.5% vs last month</div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
