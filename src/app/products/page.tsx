@@ -21,20 +21,25 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-12 relative overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-emerald-500/5 blur-[120px] rounded-full animate-pulse-slow" />
+      <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-teal-500/5 blur-[120px] rounded-full animate-pulse-slow delayed-1000" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Products Marketplace</h1>
-          <p className="text-muted-foreground mt-2">
-            Browse products from various merchants.
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">Products Marketplace</h1>
+          <p className="text-muted-foreground mt-3 text-lg">
+            Curated workspace essentials and equipment from verified merchants.
           </p>
         </div>
 
         <main>
           {products.length === 0 ? (
-            <div className="bg-white rounded-lg shadow p-8 text-center">
-              <h3 className="text-lg font-medium mb-2">No products found</h3>
-              <p className="text-muted-foreground">Check back later for new listings.</p>
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-12 text-center">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-semibold mb-2">No products found</h3>
+              <p className="text-muted-foreground">We couldn&apos;t find any products matching your search criteria.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

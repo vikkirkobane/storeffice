@@ -95,57 +95,67 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center space-x-2">
-            <Building2 className="h-8 w-8 text-primary" />
-            <span className="font-bold text-xl">Storeffice</span>
-          </Link>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Avatar>
-                <AvatarImage src={user.avatarUrl || undefined} />
-                <AvatarFallback>
-                  {user.fullName?.[0] || user.email[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium">{user.fullName || "User"}</p>
-                <p className="text-xs text-muted-foreground capitalize">{user.userType}</p>
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-emerald-500/5 blur-[120px] rounded-full animate-pulse-slow" />
+      <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-teal-500/5 blur-[120px] rounded-full animate-pulse-slow delayed-1000" />
+
+      <header className="bg-card/30 backdrop-blur-md border-b border-border sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            <Link href="/" className="flex items-center space-x-2">
+              <Building2 className="h-8 w-8 text-primary" />
+              <span className="font-bold text-xl tracking-tight">Storeffice</span>
+            </Link>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 bg-muted/50 p-1.5 pr-4 rounded-full border border-border">
+                <Avatar className="h-8 w-8 border border-border">
+                  <AvatarImage src={user.avatarUrl || undefined} />
+                  <AvatarFallback className="bg-primary/20 text-primary">
+                    {user.fullName?.[0] || user.email[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="hidden md:block text-left">
+                  <p className="text-xs font-semibold leading-none">{user.fullName || "User"}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase mt-0.5">{user.userType}</p>
+                </div>
               </div>
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="hover:text-destructive transition-colors">
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="h-5 w-5" />
-            </Button>
           </div>
         </div>
       </header>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-10">
           {/* Sidebar */}
-          <aside className="w-full md:w-64 flex-shrink-0">
-            <Card>
-              <CardContent className="p-4">
-                <nav className="space-y-2">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100"
-                    >
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.name}</span>
-                    </Link>
-                  ))}
-                </nav>
-              </CardContent>
-            </Card>
+          <aside className="w-full lg:w-72 flex-shrink-0">
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-4 sticky top-28">
+              <nav className="space-y-1.5">
+                {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group hover:bg-primary/10 hover:text-primary"
+                  >
+                    <item.icon className="h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                    <span>{item.name}</span>
+                  </Link>
+                ))}
+              </nav>
+              <div className="mt-8 pt-6 border-t border-border px-4">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Support</p>
+                <Link href="/contact" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Help Center</Link>
+              </div>
+            </div>
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1">{children}</main>
+          <main className="flex-1">
+            {children}
+          </main>
         </div>
       </div>
     </div>

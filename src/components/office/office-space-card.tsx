@@ -3,7 +3,8 @@ import { MapPin, Users, Star } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { OfficeSpace } from "@/lib/db/schema";
+import { officeSpaces } from "@/lib/db/schema";
+type OfficeSpace = typeof officeSpaces.$inferSelect;
 
 interface OfficeSpaceCardProps {
   space: OfficeSpace;
@@ -15,7 +16,7 @@ export default function OfficeSpaceCard({ space }: OfficeSpaceCardProps) {
   return (
     <Card className="overflow-hidden h-full flex flex-col">
       {/* Image */}
-      <div className="relative h-48 bg-gray-200">
+      <div className="relative h-48 bg-muted">
         {firstPhoto ? (
           <img
             src={firstPhoto}
@@ -27,10 +28,10 @@ export default function OfficeSpaceCard({ space }: OfficeSpaceCardProps) {
             No image
           </div>
         )}
-        {space.rating > 0 && (
-          <Badge className="absolute top-2 right-2 bg-white text-black flex items-center gap-1">
+        {space.rating && parseFloat(space.rating) > 0 && (
+          <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground flex items-center gap-1 border-none">
             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            {space.rating.toFixed(1)}
+            {parseFloat(space.rating).toFixed(1)}
           </Badge>
         )}
       </div>

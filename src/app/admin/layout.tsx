@@ -13,16 +13,20 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="bg-card/50 backdrop-blur-md border-b border-border sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Storeffice Admin</h1>
-          <span className="text-sm text-gray-600">Logged in as {user.fullName} ({user.userType})</span>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Storeffice Admin</h1>
+          <span className="text-sm text-muted-foreground">Logged in as <span className="text-emerald-400 font-medium">{user.fullName}</span> ({user.userType})</span>
         </div>
       </header>
       <div className="flex">
         <AdminNav />
-        <main className="flex-1 p-8">{children}</main>
+        <main className="flex-1 p-8 relative overflow-hidden">
+          {/* Subtle Background Glow */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] rounded-full -z-10" />
+          {children}
+        </main>
       </div>
     </div>
   );

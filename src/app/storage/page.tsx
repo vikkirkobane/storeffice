@@ -27,20 +27,24 @@ export default async function StoragePage({ searchParams }: StoragePageProps) {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-12 relative overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-emerald-500/5 blur-[120px] rounded-full animate-pulse-slow" />
+      <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-teal-500/5 blur-[120px] rounded-full animate-pulse-slow delayed-1000" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Storage Spaces</h1>
-          <p className="text-muted-foreground mt-2">
-            Find the perfect storage solution for your inventory or personal items.
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">Storage Spaces</h1>
+          <p className="text-muted-foreground mt-3 text-lg">
+            Find secure, scalable storage solutions for your inventory or personal assets.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Filters */}
           <aside className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6 sticky top-6">
-              <h2 className="font-semibold text-lg mb-4">Filters</h2>
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-6 sticky top-24">
+              <h2 className="font-semibold text-lg mb-4 text-foreground">Filters</h2>
               <form className="space-y-4">
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium mb-1">City</label>
@@ -87,9 +91,10 @@ export default async function StoragePage({ searchParams }: StoragePageProps) {
             </div>
             
             {spaces.length === 0 ? (
-              <div className="bg-white rounded-lg shadow p-8 text-center">
-                <h3 className="text-lg font-medium mb-2">No storage spaces found</h3>
-                <p className="text-muted-foreground">Try adjusting your filters.</p>
+              <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-12 text-center">
+                <Warehouse className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <h3 className="text-xl font-semibold mb-2">No storage spaces found</h3>
+                <p className="text-muted-foreground">Try adjusting your filters or check back later.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

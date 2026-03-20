@@ -1,9 +1,13 @@
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
-        <div className="bg-white rounded-lg shadow p-8 space-y-6 text-sm leading-relaxed">
+    <div className="min-h-screen bg-background py-16 relative overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-emerald-500/5 blur-[120px] rounded-full animate-pulse-slow" />
+      <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-purple-500/5 blur-[120px] rounded-full animate-pulse-slow delay-500" />
+
+      <div className="max-w-4xl mx-auto px-4 relative z-10">
+        <h1 className="text-4xl font-bold tracking-tight text-foreground mb-8">Terms of Service</h1>
+        <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-8 md:p-12 prose prose-invert prose-emerald max-w-none">
           <section>
             <h2 className="text-lg font-semibold mb-2">1. Acceptance of Terms</h2>
             <p>By accessing and using Storeffice, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using this service.</p>
