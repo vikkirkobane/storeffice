@@ -6,6 +6,7 @@ import { CartProvider } from "@/context/CartContext";
 import { Mail, Phone, MapPin, Building2 } from "lucide-react";
 import Image from "next/image";
 import { Toaster } from "sonner";
+import Link from "next/link";
 import MobileNav from "@/components/mobile-nav";
 
 const inter = Inter({ subsets: ["latin"] });
