@@ -67,7 +67,7 @@ export default function MobileNav() {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm md:hidden"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
@@ -76,7 +76,7 @@ export default function MobileNav() {
           <div
             ref={menuRef}
             className={cn(
-              "fixed inset-y-0 right-0 z-50 w-[80vw] max-w-sm bg-background shadow-2xl md:hidden",
+              "fixed inset-y-0 right-0 z-50 w-[80vw] max-w-sm bg-slate-950 border-l border-slate-800 md:hidden",
               "flex flex-col justify-between transform transition-transform duration-300 ease-in-out",
               "safe-area-inset-right px-6 py-6",
               isOpen ? "translate-x-0" : "translate-x-full"
@@ -95,11 +95,11 @@ export default function MobileNav() {
                 <div className="h-10 w-10 relative flex items-center justify-center">
                   <Building2 className="h-8 w-8 text-primary" />
                 </div>
-                <span className="font-bold text-xl text-foreground">Storeffice</span>
+                <span className="font-bold text-xl text-white">Storeffice</span>
               </Link>
               <button
                 onClick={() => setIsOpen(false)}
-                className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+                className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 hover:text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
                 style={{ width: "44px", height: "44px" }}
                 aria-label="Close mobile menu"
               >
@@ -115,7 +115,7 @@ export default function MobileNav() {
                     <Link
                       href={link.href}
                       onClick={() => setIsOpen(false)}
-                      className="block rounded-lg px-4 py-4 text-lg font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset transition-colors"
+                      className="block rounded-lg px-4 py-4 text-lg font-medium text-slate-100 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset transition-colors"
                       style={{ minHeight: "44px", display: "flex", alignItems: "center" }}
                     >
                       {link.label}
@@ -126,11 +126,11 @@ export default function MobileNav() {
             </nav>
 
             {/* Footer CTA */}
-            <div className="mt-auto pt-6 border-t border-border space-y-3">
+            <div className="mt-auto pt-6 border-t border-slate-800 space-y-3">
               <Link
                 href="/login"
                 onClick={() => setIsOpen(false)}
-                className="block w-full rounded-lg px-4 py-4 text-center text-base font-medium text-foreground hover:bg-accent transition-colors"
+                className="block w-full rounded-lg px-4 py-4 text-center text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors"
                 style={{ minHeight: "44px", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 Sign in
@@ -138,7 +138,7 @@ export default function MobileNav() {
               <Link
                 href="/register"
                 onClick={() => setIsOpen(false)}
-                className="block w-full rounded-lg px-4 py-4 text-center text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors"
+                className="block w-full rounded-lg px-4 py-4 text-center text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-colors"
                 style={{ minHeight: "44px", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 Get Started
