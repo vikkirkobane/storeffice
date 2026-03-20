@@ -56,7 +56,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-background text-foreground`}>
+      <body className={`${inter.className} bg-background text-foreground`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <a href="#main-content" className="skip-link">
             Skip to main content

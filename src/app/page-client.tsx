@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,431 +13,329 @@ import {
   BarChart3,
   Users,
   Globe,
-  CheckCircle2,
   ArrowRight,
-  Star,
-  TrendingUp,
   Sparkles,
   Rocket,
   Cpu,
+  Lock,
+  Boxes,
+  MapPin,
+  CreditCard,
+  LineChart,
+  Server
 } from "lucide-react";
 
 const techStack = [
-  "Next.js",
-  "TypeScript",
-  "Supabase",
-  "OpenAI",
-  "Paystack",
+  "Next.js 15",
+  "PostgreSQL",
+  "React 19",
   "Stripe",
+  "Paystack",
   "Docker",
   "Kubernetes",
-  "Terraform",
+  "Redis"
 ];
 
-const stats = [
-  { value: "500+", label: "Listings" },
-  { value: "10k+", label: "Users" },
-  { value: "98%", label: "Uptime" },
-  { value: "4.9/5", label: "Rating" },
-];
-
-const features = [
-  {
-    icon: Building2,
-    title: "Premium Spaces",
-    desc: "Handpicked offices & storage across Africa with high-speed internet.",
-    color: "text-emerald-400",
-    border: "border-emerald-500/30",
-    from: "from-emerald-500/20",
-    to: "to-teal-500/20",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Secure Payments",
-    desc: "Paystack-powered, PCI compliant, fraud detection, instant refunds.",
-    color: "text-teal-400",
-    border: "border-teal-500/30",
-    from: "from-teal-500/20",
-    to: "to-cyan-500/20",
-  },
-  {
-    icon: Zap,
-    title: "Instant Booking",
-    desc: "Real-time availability, instant confirm, automated invoicing.",
-    color: "text-amber-400",
-    border: "border-amber-500/30",
-    from: "from-amber-500/20",
-    to: "to-orange-500/20",
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics Dashboard",
-    desc: "Track bookings, revenue, occupancy with beautiful charts.",
-    color: "text-cyan-400",
-    border: "border-cyan-500/30",
-    from: "from-cyan-500/20",
-    to: "to-blue-500/20",
-  },
-  {
-    icon: Users,
-    title: "Community Trust",
-    desc: "Verified listings, genuine reviews, 4.9/5 average rating.",
-    color: "text-pink-400",
-    border: "border-pink-500/30",
-    from: "from-pink-500/20",
-    to: "to-rose-500/20",
-  },
-  {
-    icon: Globe,
-    title: "Pan-African Reach",
-    desc: "Operating across Kenya, Nigeria, South Africa, expanding further.",
-    color: "text-indigo-400",
-    border: "border-indigo-500/30",
-    from: "from-indigo-500/20",
-    to: "to-violet-500/20",
-  },
-];
-
-const testimonials = [
-  {
-    name: "Sarah K.",
-    role: "Startup Founder, Nairobi",
-    text: "Storeffice made finding our first office effortless. Smooth booking and exactly what we needed.",
-    avatar: "SK",
-  },
-  {
-    name: "James M.",
-    role: "Logistics Manager, Lagos",
-    text: "We've cut storage costs by 30%. Intuitive platform, outstanding support, and great analytics.",
-    avatar: "JM",
-  },
-  {
-    name: "Amina N.",
-    role: "Freelancer, Cape Town",
-    text: "The product marketplace is a game-changer. Order office supplies in one click and track deliveries.",
-    avatar: "AN",
-  },
-  {
-    name: "David O.",
-    role: "CTO, Accra",
-    text: "99.8% uptime, seamless API integration. Storeffice is reliable for tech teams.",
-    avatar: "DO",
-  },
+const metrics = [
+  { label: "Total Addressable Market", value: "$37B+", icon: BarChart3, color: "text-emerald-400" },
+  { label: "Platform Uptime", value: "99.99%", icon: Server, color: "text-teal-400" },
+  { label: "Transactions Processed", value: "₦2.4M+", icon: CreditCard, color: "text-cyan-400" },
+  { label: "Active Listings", value: "5,000+", icon: Boxes, color: "text-indigo-400" },
 ];
 
 export default function HomePage() {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const onMouse = (e: MouseEvent) => {
-      if (!heroRef.current) return;
-      const r = heroRef.current.getBoundingClientRect();
-      setMouse({ x: e.clientX - r.left, y: e.clientY - r.top });
-    };
-    window.addEventListener("mousemove", onMouse);
-    return () => window.removeEventListener("mousemove", onMouse);
-  }, []);
+  const { scrollYProgress } = useScroll();
+  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   return (
-    <div className="min-h-screen">
-      {/* Hero */}
-      <section
-        ref={heroRef}
-        className="relative overflow-hidden bg-[#0a0a0a] text-white py-20 lg:py-32"
-      >
-        {/* Ambient gradients */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute w-[800px] h-[800px] rounded-full bg-gradient-to-r from-emerald-500/30 via-teal-500/20 to-cyan-500/30 blur-3xl -top-40 -right-40 animate-pulse-slow" />
-          <div className="absolute w-[600px] h-[600px] rounded-full bg-gradient-to-r from-violet-500/20 via-purple-500/15 to-fuchsia-500/20 blur-3xl -bottom-40 -left-40 animate-pulse-slow" style={{ animationDelay: "2s" }} />
+    <div className="min-h-screen bg-[#030712] text-slate-50 selection:bg-emerald-500/30">
+      {/* Hero Section */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20">
+        {/* Deep dark animated background */}
+        <div className="absolute inset-0 z-0 bg-grid-white/[0.02]" />
+        <motion.div
+          className="absolute inset-0 z-0 opacity-40"
+          style={{ y, opacity }}
+        >
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow" />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-teal-600/20 rounded-full blur-[150px] mix-blend-screen animate-pulse-slow" style={{ animationDelay: "2s" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-full max-h-3xl bg-cyan-900/10 rounded-full blur-[100px]" />
+        </motion.div>
+
+        <div className="container relative z-10 px-4 sm:px-6 lg:px-8 mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="flex flex-col items-center gap-6"
+          >
+            <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-300 px-4 py-2 font-medium backdrop-blur-md rounded-full">
+              <Sparkles className="h-4 w-4 mr-2" />
+              The Infrastructure of African Commerce
+            </Badge>
+
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter leading-[1.1] max-w-5xl mx-auto drop-shadow-2xl">
+              Workspace & Storage, <br className="hidden md:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400">
+                Unified.
+              </span>
+            </h1>
+
+            <p className="mt-6 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed font-light">
+              Storeffice combines the booking model of Airbnb with the scale of Amazon. Monetize idle office space, rent intelligent storage, and reach customers instantly.
+            </p>
+
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+            >
+              <Button asChild size="lg" className="h-14 px-8 text-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] border border-emerald-500/50 rounded-full transition-all group">
+                <Link href="/register" className="flex items-center gap-2">
+                  Start Building
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg bg-slate-900/50 hover:bg-slate-800 border-slate-700 text-slate-300 backdrop-blur-md rounded-full">
+                <Link href="#investors">View Traction</Link>
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
 
-        {/* Particles */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full bg-white/10 backdrop-blur-sm animate-float"
-              style={{
-                width: `${Math.random() * 6 + 2}px`,
-                height: `${Math.random() * 6 + 2}px`,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${Math.random() * 10 + 10}s`,
-                opacity: Math.random() * 0.5 + 0.2,
-              }}
-            />
+        {/* Decorative bottom fade */}
+        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#030712] to-transparent z-10" />
+      </section>
+
+      {/* Investor Metrics Section */}
+      <section id="investors" className="py-20 relative z-20 border-y border-white/5 bg-slate-950/50 backdrop-blur-lg">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {metrics.map((metric, i) => (
+              <motion.div
+                key={metric.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.6 }}
+                className="flex flex-col items-center md:items-start p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors"
+              >
+                <div className={`p-3 rounded-xl bg-white/[0.05] ${metric.color} mb-4`}>
+                  <metric.icon className="h-6 w-6" />
+                </div>
+                <h4 className="text-4xl font-bold text-white mb-2">{metric.value}</h4>
+                <p className="text-sm text-slate-400 font-medium uppercase tracking-wider">{metric.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* The Problem & Solution (Bento Grid) */}
+      <section className="py-24 lg:py-32 relative">
+        <div className="container mx-auto px-4 z-10 relative">
+          <div className="text-center mb-16 lg:mb-24">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              The Engine of Modern Business
+            </h2>
+            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+              We solve the massive fragmentation in commercial real estate and e-commerce logistics with a single, elegant platform.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {/* Main Feature */}
+            <motion.div
+              className="md:col-span-2 relative overflow-hidden rounded-3xl bg-slate-900/40 border border-slate-800 backdrop-blur-xl group p-8 lg:p-12"
+              whileHover={{ scale: 0.99 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10 flex flex-col h-full justify-between">
+                <div>
+                  <div className="h-14 w-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-6">
+                    <Globe className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-3xl font-bold mb-4">Dual-Sided Marketplace</h3>
+                  <p className="text-slate-400 text-lg max-w-md">
+                    Connect property owners with businesses. List idle spaces, rent intelligent storage, and manage inventory—all powered by real-time analytics.
+                  </p>
+                </div>
+                <div className="mt-8 flex gap-4">
+                  <div className="h-2 w-20 bg-emerald-500 rounded-full" />
+                  <div className="h-2 w-10 bg-slate-700 rounded-full" />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Side Feature 1 */}
+            <motion.div
+              className="relative overflow-hidden rounded-3xl bg-slate-900/40 border border-slate-800 backdrop-blur-xl group p-8"
+              whileHover={{ scale: 0.99 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-bl from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="h-12 w-12 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center mb-6">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">Enterprise Security</h3>
+                <p className="text-slate-400">
+                  Bank-grade encryption, PCI-compliant payments via Paystack/Stripe, and automated fraud prevention.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Side Feature 2 */}
+            <motion.div
+              className="relative overflow-hidden rounded-3xl bg-slate-900/40 border border-slate-800 backdrop-blur-xl group p-8"
+              whileHover={{ scale: 0.99 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="h-12 w-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mb-6">
+                  <Cpu className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">AI-Powered Insights</h3>
+                <p className="text-slate-400">
+                  Predictive pricing, occupancy forecasting, and automated smart matching for spaces.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Bottom Wide Feature */}
+            <motion.div
+              className="md:col-span-2 relative overflow-hidden rounded-3xl bg-slate-900/40 border border-slate-800 backdrop-blur-xl group p-8"
+              whileHover={{ scale: 0.99 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold mb-3">Scalable Infrastructure</h3>
+                  <p className="text-slate-400">
+                    Built on Next.js 15, deployed on edge networks, backed by highly available PostgreSQL clusters. Ready for Pan-African scale.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
+                  {["Next.js", "Docker", "Typescript", "Supabase"].map(tech => (
+                    <div key={tech} className="px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-center text-sm font-medium text-slate-300">
+                      {tech}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tech Marquee */}
+      <section className="py-10 border-y border-white/5 bg-black/50 overflow-hidden">
+        <div className="flex w-[200%] animate-marquee">
+          {[...techStack, ...techStack, ...techStack].map((tech, i) => (
+            <div key={i} className="flex-1 flex justify-center text-2xl font-bold text-slate-700 mx-8">
+              {tech}
+            </div>
           ))}
         </div>
+      </section>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Left */}
-            <div className="space-y-8">
-              <Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/10 text-emerald-400 px-4 py-2 text-sm font-semibold">
-                <Sparkles className="h-4 w-4 mr-2" />
-                The Future of Workspace Management
+      {/* Showcase / Capabilities */}
+      <section className="py-24 lg:py-32 relative">
+        <div className="container mx-auto px-4 z-10 relative max-w-6xl">
+          <div className="flex flex-col md:flex-row gap-16 items-center">
+            <div className="flex-1 space-y-8">
+              <Badge variant="outline" className="border-teal-500/30 text-teal-400 bg-teal-500/10 px-3 py-1">
+                <MapPin className="h-3 w-3 mr-1" /> Core Functions
               </Badge>
+              <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+                Everything you need to <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400">operate at scale.</span>
+              </h2>
 
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-                One platform.
-                <br />
-                <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                  Infinite possibilities.
-                </span>
-              </h1>
-
-              <p className="text-lg text-slate-400 max-w-xl leading-relaxed">
-                Storeffice unifies office spaces, storage, and marketplace solutions into one seamless, intelligent platform built for modern African businesses.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild size="lg" className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 transition-all group">
-                  <Link href="/register" className="flex items-center gap-2">
-                    Get Started Free
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="border-slate-600 text-slate-300 hover:bg-slate-800/50 backdrop-blur-sm">
-                  <Link href="/demo">Watch Demo</Link>
-                </Button>
-              </div>
-
-              <div className="flex flex-wrap gap-6 pt-2 text-sm text-slate-500">
-                {["No credit card required", "14-day free trial", "Cancel anytime"].map((item) => (
-                  <div key={item} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                    <span>{item}</span>
+              <div className="space-y-6 pt-4">
+                {[
+                  { icon: Building2, title: "Asset Monetization", desc: "List and manage physical locations with granular control." },
+                  { icon: Users, title: "User Management", desc: "Role-based access control for Merchants, Owners, and Customers." },
+                  { icon: LineChart, title: "Financial Reporting", desc: "Real-time ledger, automated invoicing, and tax compliance." }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 border border-slate-700">
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-white">{item.title}</h4>
+                      <p className="text-slate-400">{item.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right - 3D Dashboard Preview */}
-            <div className="relative lg:h-[600px] flex items-center justify-center perspective-1000">
-              <div className="relative w-full h-[400px] lg:h-full rounded-3xl bg-transparent border border-white/10 shadow-2xl backdrop-blur-xl transform rotate-y-2 hover:rotate-y-0 transition-transform duration-700 ease-out"
-                   style={{ transformStyle: "preserve-3d" }}>
-                <div className="absolute inset-0 p-6 flex flex-col gap-4">
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="h-8 w-32 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center px-3">
-                      <div className="h-4 w-4 rounded-full bg-emerald-500 animate-pulse mr-2" />
-                      <span className="text-xs font-semibold text-emerald-400">Live</span>
-                    </div>
-                    <div className="h-8 w-8 rounded-full bg-slate-700/50 border border-slate-600" />
+            {/* Mockup UI Panel */}
+            <div className="flex-1 w-full relative perspective-1000">
+              <motion.div
+                className="rounded-2xl border border-white/10 bg-slate-900/80 shadow-[0_0_50px_-12px_rgba(45,212,191,0.2)] overflow-hidden backdrop-blur-2xl"
+                initial={{ rotateY: 10, rotateX: 5 }}
+                whileInView={{ rotateY: 0, rotateX: 0 }}
+                transition={{ duration: 1 }}
+                viewport={{ once: true }}
+              >
+                <div className="h-10 border-b border-white/10 bg-black/40 flex items-center px-4 gap-2">
+                  <div className="h-3 w-3 rounded-full bg-red-500/50" />
+                  <div className="h-3 w-3 rounded-full bg-amber-500/50" />
+                  <div className="h-3 w-3 rounded-full bg-green-500/50" />
+                </div>
+                <div className="p-6 grid gap-4">
+                  <div className="h-32 rounded-xl bg-gradient-to-r from-teal-900/40 to-cyan-900/40 border border-teal-500/20 p-4 flex flex-col justify-end">
+                    <div className="text-3xl font-bold text-white mb-1">₦ 12,450,000</div>
+                    <div className="text-teal-400 text-sm font-medium">+14.5% vs last month</div>
                   </div>
-                  {/* Grid */}
-                  <div className="grid grid-cols-3 gap-3 flex-1">
-                    <div className="col-span-2 space-y-3">
-                      <div className="h-24 rounded-xl bg-slate-800/80 border border-white/5 p-3">
-                        <div className="h-2 w-12 bg-emerald-500/50 rounded mb-2" />
-                        <div className="h-12 w-full bg-slate-800/80 rounded flex items-end gap-1">
-                          {[40, 65, 30, 80, 55, 90, 70].map((h, i) => (
-                            <div key={i} className="flex-1 bg-gradient-to-t from-emerald-500/80 to-emerald-500/40 rounded-t" style={{ height: `${h}%` }} />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="h-16 rounded-xl bg-slate-800/80 border border-white/5 p-3">
-                          <div className="h-2 w-8 bg-blue-500/50 rounded mb-2" />
-                          <div className="text-lg font-bold text-white">2,436</div>
-                          <div className="text-xs text-slate-500">Bookings</div>
-                        </div>
-                        <div className="h-16 rounded-xl bg-slate-800/80 border border-white/5 p-3">
-                          <div className="h-2 w-8 bg-teal-500/50 rounded mb-2" />
-                          <div className="text-lg font-bold text-white">94%</div>
-                          <div className="text-xs text-slate-500">Occupancy</div>
-                        </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="h-24 rounded-xl bg-slate-800/50 border border-slate-700/50 p-4">
+                      <div className="h-2 w-12 bg-slate-600 rounded mb-4" />
+                      <div className="h-8 w-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                        <Rocket className="h-4 w-4 text-emerald-400" />
                       </div>
                     </div>
-                    <div className="space-y-3">
-                      <div className="h-16 rounded-xl bg-slate-800/80 border border-white/5 p-3">
-                        <div className="h-2 w-10 bg-amber-500/50 rounded mb-2" />
-                        <div className="text-lg font-bold text-white">₦2.4M</div>
-                        <div className="text-xs text-slate-500">Revenue</div>
-                      </div>
-                      <div className="h-24 rounded-xl bg-slate-800/80 border border-white/5 p-3">
-                        <div className="h-2 w-12 bg-purple-500/50 rounded mb-2" />
-                        <div className="flex items-center justify-center h-10">
-                          <div className="h-10 w-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                            <Cpu className="h-5 w-5 text-emerald-400" />
-                          </div>
-                        </div>
-                        <div className="text-xs text-center text-slate-500 mt-1">AI Insights</div>
+                    <div className="h-24 rounded-xl bg-slate-800/50 border border-slate-700/50 p-4">
+                      <div className="h-2 w-16 bg-slate-600 rounded mb-4" />
+                      <div className="w-full flex items-end h-8 gap-1">
+                        {[40, 70, 45, 90, 65].map((h, i) => (
+                          <div key={i} className="flex-1 bg-cyan-500/40 rounded-t" style={{ height: `${h}%` }} />
+                        ))}
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              {/* Floating badges */}
-              <div className="absolute -top-4 -right-4 md:top-8 md:-right-8 bg-slate-900/90 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-2xl animate-bounce-slow">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                    <TrendingUp className="h-5 w-5 text-emerald-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white">Revenue +127%</p>
-                    <p className="text-xs text-slate-400">This month</p>
-                  </div>
-                </div>
-              </div>
-              <div className="absolute -bottom-4 -left-4 md:bottom-8 md:-left-8 bg-slate-900/90 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-2xl animate-bounce-slow" style={{ animationDelay: "1s" }}>
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-teal-500/20 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-teal-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white">2,000+ Active Users</p>
-                    <p className="text-xs text-slate-400">Real-time</p>
-                  </div>
-                </div>
-              </div>
+              </motion.div>
+
+              {/* Glow behind mockup */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-teal-500/10 blur-[100px] -z-10 rounded-full" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Marquee */}
-      <section className="py-12 bg-slate-950 border-y border-white/5 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
-          <p className="text-center text-sm font-semibold text-slate-500 uppercase tracking-wider">
-            Trusted by innovative companies across Africa
-          </p>
-        </div>
-        <div className="relative">
-          <div className="flex animate-marquee whitespace-nowrap">
-            {[...techStack, ...techStack].map((tech, i) => (
-              <span key={i} className="mx-8 text-4xl font-bold text-slate-300 hover:text-slate-200 transition-colors">
-                {tech}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Final CTA */}
+      <section className="py-24 relative overflow-hidden border-t border-white/5">
+        <div className="absolute inset-0 bg-[#030712]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] bg-emerald-500/20 blur-[120px] rounded-full mix-blend-screen opacity-50" />
 
-      {/* Stats */}
-      <section className="py-20 bg-gradient-to-b from-slate-900 to-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center space-y-2">
-                <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                  {stat.value}
-                </div>
-                <div className="text-sm font-medium text-slate-400 uppercase tracking-wider">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Bento */}
-      <section className="py-20 lg:py-32 bg-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-4">
-            <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 px-3 py-1">
-              <Sparkles className="h-3 w-3 mr-1" />
-              Features
-            </Badge>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-              Everything you need to
-              <br />
-              <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                scale your business
-              </span>
-            </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              From booking office spaces to managing inventory, Storeffice provides the tools to grow without friction.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {features.map((feat, idx) => (
-              <Card
-                key={feat.title}
-                className={`bg-transparent ${feat.border} backdrop-blur-sm hover:border-emerald-500/30 transition-all duration-300 overflow-hidden group`}
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${feat.from} to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
-                <div className="p-8 relative z-10">
-                  <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${feat.from} ${feat.to} border ${feat.border} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    <feat.icon className={`h-7 w-7 ${feat.color}`} />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">{feat.title}</h3>
-                  <p className="text-slate-400 leading-relaxed">{feat.desc}</p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 lg:py-32 bg-gradient-to-b from-slate-950 to-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 px-3 py-1 mb-4">
-              <Star className="h-3 w-3 mr-1 fill-current" />
-              Testimonials
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Loved by teams <span className="text-emerald-400">worldwide</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {testimonials.map((t) => (
-              <Card key={t.name} className="bg-transparent bg-slate-800/50 border-white/10 backdrop-blur-sm hover:border-emerald-500/30 transition-all duration-300 group">
-                <div className="p-8 space-y-6">
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-slate-300 italic leading-relaxed">"{t.text}"</p>
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-500/30 to-teal-500/30 border border-emerald-500/30 flex items-center justify-center font-bold text-white">
-                      {t.avatar}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white">{t.name}</p>
-                      <p className="text-sm text-slate-400">{t.role}</p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 lg:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600" />
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-0 right-0 -mr-40 -mt-40 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute bottom-0 left-0 -ml-40 -mb-40 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-        </div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-            Ready to transform your <br />
-            <span className="text-emerald-200">workspace?</span>
-          </h2>
-          <p className="text-xl text-emerald-100 max-w-2xl mx-auto mb-10">
-            Join thousands of businesses using Storeffice. Start your free trial today.
+        <div className="container relative z-10 text-center max-w-3xl mx-auto px-4">
+          <h2 className="text-5xl font-bold mb-6 tracking-tight">Invest in the future of <br /> African Infrastructure.</h2>
+          <p className="text-xl text-slate-400 mb-10">
+            Join the movement. Whether you're a property owner, retailer, or investor, Storeffice is built for scale.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-white text-emerald-700 hover:bg-slate-100 shadow-2xl transition-all group">
-              <Link href="/register" className="flex items-center gap-2">
-                Create Free Account
-                <Rocket className="h-4 w-4 group-hover:animate-bounce" />
-              </Link>
+            <Button asChild size="lg" className="h-14 px-8 text-lg bg-white text-emerald-900 hover:bg-slate-200 transition-all font-semibold rounded-full shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+              <Link href="/register">Create an Account</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm">
-              <Link href="/contact">Talk to Sales</Link>
+            <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-slate-700 text-white hover:bg-slate-800 rounded-full">
+              <Link href="mailto:invest@storeffice.com">Contact Investor Relations</Link>
             </Button>
           </div>
-          <p className="mt-6 text-emerald-200 text-sm">No credit card required. 14-day free trial. Cancel anytime.</p>
         </div>
       </section>
     </div>
