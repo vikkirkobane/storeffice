@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         fullName: user.fullName,
         userType: user.userType,
         avatarUrl: user.avatarUrl,
-        isVerified: user.isVerified,
+        emailVerified: user.emailVerified,
       },
     });
 

@@ -121,7 +121,7 @@ export async function createUser(data: {
     fullName: data.fullName,
     phone: data.phone || null,
     userType: data.userType || "customer",
-    isVerified: false,
+    emailVerified: false,
     isActive: true,
     passwordHash: hashed,
   }).returning();

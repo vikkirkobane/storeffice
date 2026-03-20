@@ -30,7 +30,7 @@ export async function GET() {
       fullName: user[0].fullName,
       userType: user[0].userType,
       avatarUrl: user[0].avatarUrl,
-      isVerified: user[0].isVerified,
+      emailVerified: user[0].emailVerified,
     },
   });
 }
