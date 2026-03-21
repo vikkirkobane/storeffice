@@ -80,9 +80,10 @@ export default function MobileNav() {
               "flex flex-col justify-between transform transition-transform duration-300 ease-in-out",
               "safe-area-inset-right px-4 py-6 pt-12",
               "overscroll-y-contain shadow-2xl",
-              "will-change-transform translate-z-0",
+              "will-change-transform",
               isOpen ? "translate-x-0" : "translate-x-full"
             )}
+            style={{ backgroundColor: '#030712', contain: 'layout style paint' }}
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation"
