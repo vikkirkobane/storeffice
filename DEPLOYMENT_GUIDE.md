@@ -149,3 +149,4 @@ Test flow:
 ---
 
 **You're all set!** The authentication system is now fully integrated with Supabase and ready for production.
+# Bump version to trigger rebuild
