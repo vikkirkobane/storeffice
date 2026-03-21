@@ -3,15 +3,34 @@ import { db, schema } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import { Users, Building2, Package, ShoppingCart } from "lucide-react";
 
-// Admin pages require authentication and use cookies - never statically generate
+// Admin pages require authentication and database access - never pre-render
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const dynamicParams = true;
+// Also set the deprecated prerender flag for older Next.js compatibility
+export const prerender = false;
 
 export default async function AdminPage() {
-  const [userCount] = await db.select({ count: sql`count(*)` }).from(schema.profiles).limit(1);
-  const [spaceCount] = await db.select({ count: sql`count(*)` }).from(schema.officeSpaces).limit(1);
-  const [productCount] = await db.select({ count: sql`count(*)` }).from(schema.products).limit(1);
-  const [orderCount] = await db.select({ count: sql`count(*)` }).from(schema.orders).limit(1);
+  let userCount = 0;
+  let spaceCount = 0;
+  let productCount = 0;
+  let orderCount = 0;
+
+  try {
+    const [users, spaces, products, orders] = await Promise.all([
+      db.select({ count: sql`count(*)` }).from(schema.profiles).limit(1),
+      db.select({ count: sql`count(*)` }).from(schema.officeSpaces).limit(1),
+      db.select({ count: sql`count(*)` }).from(schema.products).limit(1),
+      db.select({ count: sql`count(*)` }).from(schema.orders).limit(1),
+    ]);
+    userCount = Number(users[0]?.count) || 0;
+    spaceCount = Number(spaces[0]?.count) || 0;
+    productCount = Number(products[0]?.count) || 0;
+    orderCount = Number(orders[0]?.count) || 0;
+  } catch (error) {
+    console.error("Failed to fetch admin stats:", error);
+    // Keep defaults at 0 during build/error
+  }
 
   return (
     <div className="space-y-6">

@@ -17,7 +17,12 @@ export default async function AdminUsersPage() {
     redirect("/login");
   }
 
-  const users = await db.select().from(schema.profiles).orderBy(schema.profiles.createdAt).execute();
+  let users: any[] = [];
+  try {
+    users = await db.select().from(schema.profiles).orderBy(schema.profiles.createdAt).execute();
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+  }
 
   return (
     <div className="space-y-6">

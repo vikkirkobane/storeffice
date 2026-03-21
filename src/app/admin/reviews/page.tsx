@@ -16,20 +16,27 @@ export default async function AdminReviewsPage() {
   }
 
   // Fetch all reviews with user info (join profiles)
-  const reviews = await db.select({
-    id: schema.reviews.id,
-    userId: schema.reviews.userId,
-    targetId: schema.reviews.targetId,
-    targetType: schema.reviews.targetType,
-    rating: schema.reviews.rating,
-    comment: schema.reviews.comment,
-    createdAt: schema.reviews.createdAt,
-    userFullName: schema.profiles.fullName,
-  }).from(schema.reviews)
-    .innerJoin(schema.profiles, eq(schema.reviews.userId, schema.profiles.id))
-    .orderBy(schema.reviews.createdAt)
-    .limit(50)
-    .execute();
+  let reviews: any[] = [];
+  try {
+    const result = await db.select({
+      id: schema.reviews.id,
+      userId: schema.reviews.userId,
+      targetId: schema.reviews.targetId,
+      targetType: schema.reviews.targetType,
+      rating: schema.reviews.rating,
+      comment: schema.reviews.comment,
+      createdAt: schema.reviews.createdAt,
+      userFullName: schema.profiles.fullName,
+    }).from(schema.reviews)
+      .innerJoin(schema.profiles, eq(schema.reviews.userId, schema.profiles.id))
+      .orderBy(schema.reviews.createdAt)
+      .limit(50)
+      .execute();
+    reviews = result;
+  } catch (error) {
+    console.error("Failed to fetch reviews:", error);
+    // Keep empty array on error
+  }
 
   return (
     <div className="space-y-6">

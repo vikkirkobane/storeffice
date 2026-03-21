@@ -17,10 +17,20 @@ export default async function AdminTransactionsPage() {
   }
 
   // Fetch recent bookings and orders
-  const [bookings, orders] = await Promise.all([
-    db.select().from(schema.bookings).orderBy(schema.bookings.createdAt).limit(50).execute(),
-    db.select().from(schema.orders).orderBy(schema.orders.createdAt).limit(50).execute(),
-  ]);
+  let bookings: any[] = [];
+  let orders: any[] = [];
+
+  try {
+    const [bookingsResult, ordersResult] = await Promise.all([
+      db.select().from(schema.bookings).orderBy(schema.bookings.createdAt).limit(50).execute(),
+      db.select().from(schema.orders).orderBy(schema.orders.createdAt).limit(50).execute(),
+    ]);
+    bookings = bookingsResult;
+    orders = ordersResult;
+  } catch (error) {
+    console.error("Failed to fetch transactions:", error);
+    // Keep empty arrays on error
+  }
 
   // Also fetch payment intents to see if they exist
   // We'll display a simple table with IDs, totals, status, and refund action for those with Stripe PI

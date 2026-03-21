@@ -18,10 +18,20 @@ export default async function AdminListingsPage() {
     redirect("/login");
   }
 
-  const [officeSpaces, products] = await Promise.all([
-    db.select().from(schema.officeSpaces).orderBy(schema.officeSpaces.createdAt).execute(),
-    db.select().from(schema.products).orderBy(schema.products.createdAt).execute(),
-  ]);
+  let officeSpaces: any[] = [];
+  let products: any[] = [];
+
+  try {
+    const [spaces, productsList] = await Promise.all([
+      db.select().from(schema.officeSpaces).orderBy(schema.officeSpaces.createdAt).execute(),
+      db.select().from(schema.products).orderBy(schema.products.createdAt).execute(),
+    ]);
+    officeSpaces = spaces;
+    products = productsList;
+  } catch (error) {
+    console.error("Failed to fetch listings:", error);
+    // Keep empty arrays on error
+  }
 
   return (
     <div className="space-y-6">
