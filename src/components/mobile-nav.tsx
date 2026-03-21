@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu, X, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -50,38 +51,27 @@ export default function MobileNav() {
     };
   }, [isOpen]);
 
-  return (
-    <>
-      {/* Hamburger button - proper touch target */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors"
-        style={{ width: "44px", height: "44px" }}
-        aria-label="Open mobile menu"
-      >
-        <Menu className="h-6 w-6" />
-      </button>
-
-      {/* Full-screen overlay menu */}
-      {isOpen && (
+  // Render the mobile menu overlay and drawer via portal to avoid containing block issues
+  const mobileMenu = isOpen
+    ? createPortal(
         <>
           {/* Backdrop - pure black with 80% opacity (Material Design scrim) */}
           <div
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm md:hidden will-change-opacity"
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm md:hidden"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
 
-          {/* Drawer - solid surface with elevation and GPU acceleration */}
+          {/* Drawer - solid surface with elevation, slides from right */}
           <div
             ref={menuRef}
             className={cn(
               "fixed inset-y-0 right-0 z-50 w-[85vw] max-w-sm bg-[#030712] border-l border-slate-700 md:hidden",
               "flex flex-col justify-between transform transition-transform duration-300 ease-in-out",
-              "safe-area-inset-right px-4 py-6 pt-12",
+              "safe-area-inset-right px-4 py-6 pt-16",
               "overscroll-y-contain shadow-2xl",
               "will-change-transform",
-              isOpen ? "translate-x-0" : "translate-x-full"
+              "translate-x-0"
             )}
             style={{ backgroundColor: '#030712', contain: 'layout style paint' }}
             role="dialog"
@@ -148,8 +138,23 @@ export default function MobileNav() {
               </Link>
             </div>
           </div>
-        </>
-      )}
+        </>,
+        document.body
+      )
+    : null;
+
+  return (
+    <>
+      {/* Hamburger button - proper touch target */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors"
+        style={{ width: "44px", height: "44px" }}
+        aria-label="Open mobile menu"
+      >
+        <Menu className="h-6 w-6" />
+      </button>
+      {mobileMenu}
     </>
   );
 }
