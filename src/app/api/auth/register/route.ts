@@ -1,60 +1,113 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, schema } from "@/lib/db";
-import { eq } from "drizzle-orm";
-import { createUser, generateAccessToken, generateRefreshToken } from "@/lib/auth-core";
+import { createClientSupabase } from "@/lib/supabase";
+import { insertProfileSchema } from "@/lib/db/schema";
+import { z } from "zod";
+
+const registerSchema = insertProfileSchema.extend({
+  email: z.string().email(),
+  password: z.string().min(8),
+  fullName: z.string().min(2),
+  userType: z.enum(["customer", "owner", "merchant"]).default("customer"),
+  phone: z.string().optional(),
+});
 
 /**
  * POST /api/auth/register
  * Body: { email, password, fullName, phone?, userType? }
- * Returns: { accessToken, refreshToken, user }
+ * Returns: { session, user profile }
  */
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, fullName, phone, userType } = await request.json();
-    if (!email || !password || !fullName) {
-      return NextResponse.json({ error: "Email, password, and full name required" }, { status: 400 });
+    const body = await request.json();
+    const validated = registerSchema.parse(body);
+
+    const supabase = await createClientSupabase();
+
+    // Check if user already exists (via auth.users)
+    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    if (existingUsers.users.some((u) => u.email === validated.email)) {
+      return NextResponse.json(
+        { error: "Email already registered" },
+        { status: 409 }
+      );
     }
 
-    const existing = await db.select().from(schema.profiles).where(eq(schema.profiles.email, email)).limit(1).execute();
-    if (existing.length > 0) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
-    }
-
-    const user = await createUser({
-      email,
-      password,
-      fullName,
-      phone,
-      userType,
-    });
-
-    const accessToken = await generateAccessToken({ userId: user.id, userType: user.userType });
-    const refreshToken = await generateRefreshToken({ userId: user.id });
-
-    const response = NextResponse.json({
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        userType: user.userType,
-        avatarUrl: user.avatarUrl,
-        emailVerified: user.emailVerified,
+    // Create auth user with Supabase Auth
+    const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
+      email: validated.email,
+      password: validated.password,
+      email_confirm: false, // require verification
+      user_metadata: {
+        full_name: validated.fullName,
+        phone: validated.phone,
+        user_type: validated.userType,
       },
     });
 
-    response.cookies.set("access_token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 15,
-      path: "/",
+    if (signUpError) {
+      return NextResponse.json(
+        { error: signUpError.message },
+        { status: 400 }
+      );
+    }
+
+    const newUserId = authData.user.id;
+
+    // Create profile record
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert({
+        id: newUserId,
+        email: validated.email,
+        full_name: validated.fullName,
+        phone: validated.phone || null,
+        user_type: validated.userType,
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (profileError) {
+      // Cleanup: delete auth user if profile creation fails
+      await supabase.auth.admin.deleteUser(newUserId);
+      console.error("Profile creation error:", profileError);
+      return NextResponse.json(
+        { error: "Failed to create profile" },
+        { status: 500 }
+      );
+    }
+
+    // Optionally: Send email verification via Supabase (if email confirmation required)
+    // Supabase can send confirmation emails automatically based on auth settings
+
+    // Auto-sign-in after registration (optional)
+    const { data: sessionData } = await supabase.auth.signInWithPassword({
+      email: validated.email,
+      password: validated.password,
     });
 
-    return response;
+    // Get the profile we just created to return full data
+    const { data: newProfile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", newUserId)
+      .single();
+
+    return NextResponse.json({
+      user: {
+        ...newProfile,
+        id: authData.user.id,
+        email: authData.user.email,
+        email_verified: authData.user.email_confirmed_at !== null,
+        user_metadata: authData.user.user_metadata,
+      },
+      session: sessionData.session,
+    });
   } catch (error) {
     console.error("Register error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

@@ -1,37 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyRefreshToken, generateAccessToken } from "@/lib/auth-core";
+import { NextResponse } from "next/server";
+import { createClientSupabase } from "@/lib/supabase";
 
 /**
  * POST /api/auth/refresh
- * Body: { refreshToken: string }
- * Returns: { accessToken }
+ * Manually refresh access token if needed
+ * Note: Supabase client auto-refreshes, this endpoint is for manual refresh scenarios
  */
 export async function POST(request: NextRequest) {
   try {
-    const { refreshToken } = await request.json();
-    if (!refreshToken) {
-      return NextResponse.json({ error: "Refresh token required" }, { status: 400 });
+    const supabase = await createClientSupabase();
+
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.refreshSession();
+
+    if (error) {
+      return NextResponse.json(
+        { error: "Failed to refresh session" },
+        { status: 401 }
+      );
     }
 
-    const payload = await verifyRefreshToken(refreshToken);
-    if (!payload) {
-      return NextResponse.json({ error: "Invalid or expired refresh token" }, { status: 401 });
-    }
-
-    const accessToken = await generateAccessToken({ userId: payload.userId });
-
-    const response = NextResponse.json({ accessToken });
-    response.cookies.set("access_token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 15,
-      path: "/",
-    });
-
-    return response;
+    return NextResponse.json({ session });
   } catch (error) {
     console.error("Refresh error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

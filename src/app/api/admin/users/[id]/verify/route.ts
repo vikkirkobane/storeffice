@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { verifyAccessToken, getUserById } from "@/lib/auth-core";
+import { createClientSupabase } from "@/lib/supabase";
 
 /**
  * POST /api/admin/users/:id/verify
@@ -14,19 +13,35 @@ export async function POST(
 ) {
   try {
     const { id: targetUserId } = await params;
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await createClientSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const payload = await verifyAccessToken(token);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const admin = await getUserById(payload.userId);
-    if (!admin || !["admin", "owner"].includes(admin[0].userType)) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("userType")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || !["admin", "owner"].includes(profile.userType)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    await db.update(schema.profiles).set({ emailVerified: true }).where(eq(schema.profiles.id, targetUserId));
+    // With Supabase Auth, email verification is handled automatically via email confirmations.
+    // This endpoint can be used to manually verify a user's email if needed by setting email_confirmed_at.
+    const { error } = await supabase.auth.admin.updateUserById(targetUserId, {
+      email_confirmed_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Admin verify user error:", error);

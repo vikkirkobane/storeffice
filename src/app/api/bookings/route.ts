@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { z } from "zod";
 import { db, schema } from "@/lib/db";
 import { eq, and, sql } from "drizzle-orm";
-import { verifyAccessToken, getUserById } from "@/lib/auth-core";
+import { createClientSupabase } from "@/lib/supabase";
 import { initializePaystackTransaction } from "@/lib/paystack";
 import { sendEmail } from "@/services/email-service";
 
@@ -22,24 +21,23 @@ const createBookingSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("access_token")?.value;
-    if (!accessToken) {
+    const supabase = await createClientSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
-    if (!payload) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
-    }
+    // Get profile
+    const { data: customer } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-    const user = await getUserById(payload.userId);
-    if (!user || user.length === 0) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 });
-    }
-
-    const customer = user[0];
-    if (!customer.isActive) {
+    if (!customer || !customer.isActive) {
       return NextResponse.json({ error: "Account disabled" }, { status: 403 });
     }
 

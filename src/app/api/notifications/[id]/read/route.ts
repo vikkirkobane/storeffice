@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { verifyAccessToken } from "@/lib/auth-core";
+import { createClientSupabase } from "@/lib/supabase";
 
 /**
  * POST /api/notifications/:id/read
@@ -14,15 +13,17 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("access_token")?.value;
-    if (!accessToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await createClientSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const payload = await verifyAccessToken(accessToken);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     await db.update(schema.notifications).set({ isRead: true }).where(
-      eq(schema.notifications.id, id).and(eq(schema.notifications.userId, payload.userId))
+      eq(schema.notifications.id, id).and(eq(schema.notifications.userId, user.id))
     );
     return NextResponse.json({ ok: true });
   } catch (error) {

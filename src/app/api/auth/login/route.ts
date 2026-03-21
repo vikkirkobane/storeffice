@@ -1,62 +1,65 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, schema } from "@/lib/db";
-import { eq } from "drizzle-orm";
-import { verifyPassword, generateAccessToken, generateRefreshToken } from "@/lib/auth-core";
+import { createClientSupabase } from "@/lib/supabase";
 
 /**
  * POST /api/auth/login
  * Body: { email: string, password: string }
- * Returns: { accessToken, refreshToken, user }
+ * Returns: { session, user profile }
  */
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
+
     if (!email || !password) {
-      return NextResponse.json({ error: "Email and password required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 }
+      );
     }
 
-    const result = await db.select().from(schema.profiles).where(eq(schema.profiles.email, email)).limit(1).execute();
-    if (!result.length) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    const supabase = await createClientSupabase();
+
+    // Sign in with Supabase Auth
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 401 }
+      );
     }
 
-    const user = result[0];
-    if (!user.passwordHash) {
-      return NextResponse.json({ error: "Account not set up properly" }, { status: 400 });
-    }
-
-    const valid = await verifyPassword(password, user.passwordHash);
-    if (!valid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-    }
-
-    const accessToken = await generateAccessToken({ userId: user.id, userType: user.userType });
-    const refreshToken = await generateRefreshToken({ userId: user.id });
+    // Get user profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", data.user.id)
+      .single();
 
     const response = NextResponse.json({
-      accessToken,
-      refreshToken,
       user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        userType: user.userType,
-        avatarUrl: user.avatarUrl,
-        emailVerified: user.emailVerified,
+        ...profile,
+        id: data.user.id,
+        email: data.user.email,
+        email_verified: data.user.email_confirmed_at !== null,
+        user_metadata: data.user.user_metadata,
+        app_metadata: data.user.app_metadata,
       },
+      session: data.session,
     });
 
-    response.cookies.set("access_token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 15,
-      path: "/",
-    });
+    // Supabase SSR will handle cookies automatically if we use createClientSupabase properly
+    // The cookie is set by the supabase.auth.signInWithPassword call internally
 
     return response;
   } catch (error) {
     console.error("Login error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

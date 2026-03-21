@@ -1,36 +1,84 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, schema } from "@/lib/db";
-import { eq } from "drizzle-orm";
-import { verifyPassword, hashPassword } from "@/lib/auth-core";
+import { createClientSupabase } from "@/lib/supabase";
+import { z } from "zod";
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  password: z.string().min(8),
+});
 
 /**
  * POST /api/auth/reset-password
  * Body: { token, password }
- * In a real system, token would be a JWT or DB-stored token. For now we assume token is not used and simply allow reset if user exists by email.
- * Actually we should accept email + token. For demo, just accept email and new password via token (JWT).
+ * Updates user password using Supabase Auth
  */
 export async function POST(request: NextRequest) {
   try {
-    const { token, password } = await request.json();
-    if (!token || !password) {
-      return NextResponse.json({ error: "Token and password required" }, { status: 400 });
+    const body = await request.json();
+    const { token, password } = resetPasswordSchema.parse(body);
+
+    const supabase = await createClientSupabase();
+
+    // Verify the reset token and update password
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: token,
+      type: "recovery",
+      email: "", // Not needed for recovery flow if token is valid
+    });
+
+    if (error) {
+      return NextResponse.json(
+        { error: "Invalid or expired reset token" },
+        { status: 400 }
+      );
     }
 
-    // Decode token to get userId (we could sign a JWT when requesting reset). For now, we'll trust token as userId (not secure, only for demo)
-    // In production, use a signed JWT with userId and expiration, verify with jose.
-    const userId = token; // placeholder
+    // Update the user's password (the OTP verification establishes a session)
+    // Actually, verifyOtp returns a session. Then we can update the password.
+    // But better way: use updateUser with the current session
 
-    const [user] = await db.select().from(schema.profiles).where(eq(schema.profiles.id, userId)).limit(1).execute();
+    // Get the current user from the session established by verifyOtp
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Invalid reset token" },
+        { status: 400 }
+      );
     }
 
-    const newHash = await hashPassword(password);
-    await db.update(schema.profiles).set({ passwordHash: newHash }).where(eq(schema.profiles.id, userId));
+    // Update password
+    const { error: updateError } = await supabase.auth.updateUser({
+      password,
+    });
 
-    return NextResponse.json({ ok: true });
+    if (updateError) {
+      return NextResponse.json(
+        { error: updateError.message },
+        { status: 400 }
+      );
+    }
+
+    // Optionally: force sign out from other devices
+    // await supabase.auth.admin.deleteUser(user.id); // This would delete the user - not appropriate
+
+    return NextResponse.json({
+      ok: true,
+      message: "Password reset successfully",
+    });
   } catch (error) {
     console.error("Reset password error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: error.errors },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

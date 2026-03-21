@@ -2,15 +2,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect_to") || "/dashboard";
+  const registered = searchParams.get("registered");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,23 +25,20 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || "Login failed");
+
+      if (error) {
+        throw new Error(error.message);
       }
-      
-      toast.success("Welcome back! Signing you in...");
+
+      toast.success("Welcome back!");
       
       // Small delay for toast visibility
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push(redirectTo);
         router.refresh();
       }, 1000);
     } catch (error: any) {
@@ -59,6 +61,11 @@ export default function LoginPage() {
           <CardDescription className="text-center text-slate-400 text-base">
             Access your Storeffice account
           </CardDescription>
+          {registered && (
+            <p className="text-sm text-emerald-400 text-center mt-2">
+              Account created! Please verify your email before signing in.
+            </p>
+          )}
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
@@ -78,7 +85,7 @@ export default function LoginPage() {
             <div className="space-y-2.5">
               <div className="flex items-center justify-between ml-1">
                 <Label htmlFor="password" className="text-slate-200 font-medium">Password</Label>
-                <Link href="/forgot-password" size="sm" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
+                <Link href="/forgot-password" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
                   Forgot?
                 </Link>
               </div>

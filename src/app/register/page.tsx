@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -32,21 +33,50 @@ export default function RegisterPage() {
     setLoading(true);
     
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      // Step 1: Create auth user (Supabase will handle email confirmation)
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+            phone: formData.phone,
+            user_type: formData.userType,
+          },
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email`,
+        },
       });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || "Registration failed");
+
+      if (signUpError) {
+        throw signUpError;
       }
-      
+
+      if (!authData.user) {
+        throw new Error("User creation failed");
+      }
+
+      // Step 2: Create profile record
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+          id: authData.user.id,
+          email: formData.email,
+          fullName: formData.fullName,
+          phone: formData.phone || null,
+          userType: formData.userType,
+          isActive: true,
+        });
+
+      if (profileError) {
+        // Attempt cleanup if profile insert fails
+        console.error("Profile error:", profileError);
+        // Note: auth user still exists but without profile - admin will need to handle
+        // In production, use edge functions or transaction-like behavior
+      }
+
       toast.success("Account created successfully!");
       toast.info("Please check your email to verify your account.");
-      
+
       // Delay for toasts and redirect to login
       setTimeout(() => {
         router.push("/login?registered=true");

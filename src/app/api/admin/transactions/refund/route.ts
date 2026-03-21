@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { verifyAccessToken, getUserById } from "@/lib/auth-core";
+import { createClientSupabase } from "@/lib/supabase";
 import { refundPaystackTransaction } from "@/lib/paystack";
 
 export const dynamic = 'force-dynamic';
@@ -14,15 +13,22 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await createClientSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const payload = await verifyAccessToken(token);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const admin = await getUserById(payload.userId);
-    if (!admin || !["admin", "owner"].includes(admin[0].userType)) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("userType")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || !["admin", "owner"].includes(profile.userType)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
