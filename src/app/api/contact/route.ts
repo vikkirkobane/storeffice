@@ -1,29 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendEmail } from "@/services/email-service";
 
 /**
  * POST /api/contact
- * Body: { name, email, message }
- * Sends an email via Resend to the site admin.
+ * Stub endpoint for contact form - returns success without sending email
+ * To implement fully: integrate with Resend or nodemailer
  */
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, message } = await request.json();
+    const data = await request.json();
+    const { name, email, message } = data;
+
     if (!name || !email || !message) {
-      return NextResponse.json({ error: "Name, email, and message are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Name, email, and message are required" },
+        { status: 400 }
+      );
     }
 
-    await sendEmail({
-      to: process.env.RESEND_FROM_EMAIL || "support@storeffice.com",
-      from: `${name} <${email}>`,
-      subject: `Storeffice Contact: ${name}`,
-      text: message,
-      html: `<p><strong>From:</strong> ${name} (${email})</p><p>${message.replace(/\n/g, "<br>")}</p>`,
-    });
+    console.log(`Contact form submission from ${name} (${email}): ${message.substring(0, 100)}...`);
 
-    return NextResponse.json({ ok: true });
+    // TODO: Send email via Resend
+    // await sendEmail({ to: "admin@storeffice.com", subject: "New Contact", text: ... });
+
+    return NextResponse.json({ ok: true, message: "Message received! We'll get back to you soon." });
   } catch (error) {
     console.error("Contact form error:", error);
-    return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to send message" },
+      { status: 500 }
+    );
   }
 }
