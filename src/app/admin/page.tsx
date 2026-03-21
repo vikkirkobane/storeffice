@@ -3,8 +3,9 @@ import { db, schema } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import { Users, Building2, Package, ShoppingCart } from "lucide-react";
 
-// Admin pages require authentication and use cookies/supabase client
+// Admin pages require authentication and use cookies - never statically generate
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function AdminPage() {
   const [userCount] = await db.select({ count: sql`count(*)` }).from(schema.profiles).limit(1);
