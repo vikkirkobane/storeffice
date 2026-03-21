@@ -148,13 +148,6 @@ scroll-anchor {
   transform: translateZ(0);
 }
 
-/* Force solid rendering on Chrome mobile */
-@media (-webkit-touch-callout: none) {
-  .fixed.bg-black\\/80 {
-    background-color: rgba(0, 0, 0, 0.8) !important;
-  }
-}
-
 /* Ensure drawer shadow is visible */
 .shadow-2xl {
   --tw-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
