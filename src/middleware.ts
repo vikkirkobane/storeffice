@@ -17,18 +17,11 @@ const publicRoutes = [
   "/api/health", // health check endpoint
 ];
 
-// Routes that require email verification (after user verifies email)
-const verificationRequiredRoutes = [
-  "/dashboard",
-  "/profile",
-  "/settings",
-];
-
 /**
  * Combined middleware:
  * - Rate limiting for API routes
  * - Authentication for protected routes
- * - Email verification enforcement
+ * - Email verification optional (configurable)
  */
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -48,7 +41,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Skip middleware for static files and API routes (except auth session check if needed)
+  // Skip middleware for static files and API routes
   if (path.startsWith("/api/") || path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
     return NextResponse.next();
   }
@@ -60,7 +53,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protected route - check authentication
+  // Protected route - check authentication (no email verification required)
   try {
     const supabase = await createClientSupabase();
     const { data: { user } } = await supabase.auth.getUser();
@@ -71,26 +64,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Check email verification for sensitive routes
-    const requiresVerification = verificationRequiredRoutes.some((route) => path.startsWith(route));
-    if (requiresVerification) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("email_verified")
-        .eq("id", user.id)
-        .single();
-
-      // Note: Supabase Auth email confirmation is checked via email_confirmed_at on user object
-      // But we also have custom flag in profiles, can use either
-      const isEmailConfirmed = user.email_confirmed_at !== null;
-      
-      if (!isEmailConfirmed) {
-        // Redirect to email verification prompt or resend verification
-        const url = new URL("/dashboard?verify_email=true", request.url);
-        return NextResponse.redirect(url);
-      }
-    }
-
+    // User is authenticated - allow access regardless of email verification
     return NextResponse.next();
   } catch (error) {
     console.error("Middleware error:", error);
