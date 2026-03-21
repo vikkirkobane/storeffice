@@ -139,3 +139,24 @@ scroll-anchor {
   -webkit-backdrop-filter: blur(48px);
   backdrop-filter: blur(48px);
 }
+
+/* GPU acceleration for smooth animations */
+.will-change-transform {
+  will-change: transform;
+}
+.translate-z-0 {
+  transform: translateZ(0);
+}
+
+/* Force solid rendering on Chrome mobile */
+@media (-webkit-touch-callout: none) {
+  .fixed.bg-black\\/80 {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+  }
+}
+
+/* Ensure drawer shadow is visible */
+.shadow-2xl {
+  --tw-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  box-shadow: var(--tw-shadow);
+}

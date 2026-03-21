@@ -65,21 +65,22 @@ export default function MobileNav() {
       {/* Full-screen overlay menu */}
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - pure black with 80% opacity (Material Design scrim) */}
           <div
-            className="fixed inset-0 z-50 bg-[#030712]/95 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm md:hidden will-change-opacity"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
 
-          {/* Drawer - slides from right with safe area */}
+          {/* Drawer - solid surface with elevation and GPU acceleration */}
           <div
             ref={menuRef}
             className={cn(
-              "fixed inset-y-0 right-0 z-50 w-[85vw] max-w-sm bg-[#030712] border-l border-slate-800 md:hidden",
+              "fixed inset-y-0 right-0 z-50 w-[85vw] max-w-sm bg-[#030712] border-l border-slate-700 md:hidden",
               "flex flex-col justify-between transform transition-transform duration-300 ease-in-out",
               "safe-area-inset-right px-4 py-6 pt-12",
-              "overscroll-y-contain",
+              "overscroll-y-contain shadow-2xl",
+              "will-change-transform translate-z-0",
               isOpen ? "translate-x-0" : "translate-x-full"
             )}
             role="dialog"
