@@ -9,6 +9,10 @@ import Link from "next/link";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { format } from "date-fns";
 
+// Dashboard pages require auth and DB access - dynamic
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function DashboardBookingsPage() {
   const [user] = await getServerUser();
   
@@ -16,17 +20,23 @@ export default async function DashboardBookingsPage() {
     redirect("/login");
   }
 
-  // Fetch user's bookings with office space details
-  const bookings = await db
-    .select({
-      booking: schema.bookings,
-      space: schema.officeSpaces,
-    })
-    .from(schema.bookings)
-    .leftJoin(schema.officeSpaces, eq(schema.bookings.spaceId, schema.officeSpaces.id))
-    .where(eq(schema.bookings.customerId, user.id))
-    .orderBy(desc(schema.bookings.createdAt))
-    .execute();
+  let bookings: any[] = [];
+  try {
+    const result = await db
+      .select({
+        booking: schema.bookings,
+        space: schema.officeSpaces,
+      })
+      .from(schema.bookings)
+      .leftJoin(schema.officeSpaces, eq(schema.bookings.spaceId, schema.officeSpaces.id))
+      .where(eq(schema.bookings.customerId, user.id))
+      .orderBy(desc(schema.bookings.createdAt))
+      .execute();
+    bookings = result;
+  } catch (error) {
+    console.error("Failed to fetch bookings:", error);
+    // Keep empty array on error
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {

@@ -9,6 +9,10 @@ import Link from "next/link";
 import { Package, Clock, CheckCircle, Truck, XCircle } from "lucide-react";
 import { format } from "date-fns";
 
+// Requires auth and DB
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function DashboardOrdersPage() {
   const [user] = await getServerUser();
   
@@ -16,19 +20,28 @@ export default async function DashboardOrdersPage() {
     redirect("/login");
   }
 
-  // Fetch orders with order items and product info
-  const orders = await db
-    .select({
-      order: schema.orders,
-      items: schema.orderItems,
-      product: schema.products,
-    })
-    .from(schema.orders)
-    .leftJoin(schema.orderItems, eq(schema.orders.id, schema.orderItems.orderId))
-    .leftJoin(schema.products, eq(schema.orderItems.productId, schema.products.id))
-    .where(eq(schema.orders.customerId, user.id))
-    .orderBy(desc(schema.orders.createdAt))
-    .execute();
+  let rawOrders: any[] = [];
+  try {
+    rawOrders = await db
+      .select({
+        order: schema.orders,
+        items: schema.orderItems,
+        product: schema.products,
+      })
+      .from(schema.orders)
+      .leftJoin(schema.orderItems, eq(schema.orders.id, schema.orderItems.orderId))
+      .leftJoin(schema.products, eq(schema.orderItems.productId, schema.products.id))
+      .where(eq(schema.orders.customerId, user.id))
+      .orderBy(desc(schema.orders.createdAt))
+      .execute();
+  } catch (error) {
+    console.error("Failed to fetch orders:", error);
+    // Keep empty array
+  }
+
+  // Group by order
+  const grouped = new Map();
+  for (const row of rawOrders) {
 
   // Group by order
   const grouped = new Map();

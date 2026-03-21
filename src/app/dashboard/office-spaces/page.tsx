@@ -7,6 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Pencil, Trash2, Plus, Building2 } from "lucide-react";
 
+// Requires auth and DB
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function DashboardOfficeSpacesPage() {
   const [user] = await getServerUser();
   
@@ -18,10 +22,14 @@ export default async function DashboardOfficeSpacesPage() {
     );
   }
 
-  // Fetch user's office spaces (if owner or admin)
-  const mySpaces = user.userType === "owner" || user.userType === "admin"
-    ? await db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.ownerId, user.id)).execute()
-    : [];
+  let mySpaces: any[] = [];
+  if (user.userType === "owner" || user.userType === "admin") {
+    try {
+      mySpaces = await db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.ownerId, user.id)).execute();
+    } catch (error) {
+      console.error("Failed to fetch office spaces:", error);
+    }
+  }
 
   return (
     <div className="space-y-6">

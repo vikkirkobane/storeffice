@@ -8,6 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Plus, Package, Pencil } from "lucide-react";
 
+// Requires auth and DB
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function DashboardProductsPage() {
   const [user] = await getServerUser();
   
@@ -15,9 +19,14 @@ export default async function DashboardProductsPage() {
     redirect("/login");
   }
 
-  const myProducts = ["merchant", "owner", "admin"].includes(user.userType)
-    ? await db.select().from(schema.products).where(eq(schema.products.merchantId, user.id)).execute()
-    : [];
+  let myProducts: any[] = [];
+  if (["merchant", "owner", "admin"].includes(user.userType)) {
+    try {
+      myProducts = await db.select().from(schema.products).where(eq(schema.products.merchantId, user.id)).execute();
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    }
+  }
 
   return (
     <div className="space-y-6">

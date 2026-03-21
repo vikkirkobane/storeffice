@@ -8,6 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Plus, Warehouse, Pencil } from "lucide-react";
 
+// Requires auth and DB
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function DashboardStoragePage() {
   const [user] = await getServerUser();
   
@@ -19,9 +23,14 @@ export default async function DashboardStoragePage() {
     );
   }
 
-  const mySpaces = user.userType === "merchant" || user.userType === "owner" || user.userType === "admin"
-    ? await db.select().from(schema.storageSpaces).where(eq(schema.storageSpaces.ownerId, user.id)).execute()
-    : [];
+  let mySpaces: any[] = [];
+  if (["merchant", "owner", "admin"].includes(user.userType)) {
+    try {
+      mySpaces = await db.select().from(schema.storageSpaces).where(eq(schema.storageSpaces.ownerId, user.id)).execute();
+    } catch (error) {
+      console.error("Failed to fetch storage spaces:", error);
+    }
+  }
 
   return (
     <div className="space-y-6">
