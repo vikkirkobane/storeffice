@@ -67,7 +67,7 @@ export default function MobileNav() {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-50 bg-[#030712]/95 backdrop-blur-sm md:hidden"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
@@ -76,7 +76,7 @@ export default function MobileNav() {
           <div
             ref={menuRef}
             className={cn(
-              "fixed inset-y-0 right-0 z-50 w-[85vw] max-w-sm bg-slate-950 border-l border-slate-800 md:hidden",
+              "fixed inset-y-0 right-0 z-50 w-[85vw] max-w-sm bg-[#030712] border-l border-slate-800 md:hidden",
               "flex flex-col justify-between transform transition-transform duration-300 ease-in-out",
               "safe-area-inset-right px-4 py-6 pt-12",
               "overscroll-y-contain",

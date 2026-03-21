@@ -121,3 +121,21 @@ scroll-anchor {
     scroll-behavior: auto !important;
   }
 }
+
+/* Backdrop filter support for Chrome */
+.backdrop-blur-sm {
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.backdrop-blur-md {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.backdrop-blur-lg {
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+.backdrop-blur-xl {
+  -webkit-backdrop-filter: blur(48px);
+  backdrop-filter: blur(48px);
+}
