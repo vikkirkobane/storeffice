@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+// Uses getServerUser which requires cookies - must be dynamic
+export const dynamic = 'force-dynamic';
+
 export default async function AdminTransactionsPage() {
   const admin = await getServerUser();
   if (!admin || !["admin", "owner"].includes(admin.userType)) {

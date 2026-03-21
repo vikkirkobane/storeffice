@@ -5,6 +5,9 @@ import { eq } from "drizzle-orm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+// Uses getServerUser which requires cookies - must be dynamic
+export const dynamic = 'force-dynamic';
+
 export default async function AdminReviewsPage() {
   const admin = await getServerUser();
   if (!admin || !["admin", "owner"].includes(admin.userType)) {

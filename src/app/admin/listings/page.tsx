@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 
+// Uses getServerUser which requires cookies - must be dynamic
+export const dynamic = 'force-dynamic';
+
 export default async function AdminListingsPage() {
   const admin = await getServerUser();
   if (!admin || !["admin", "owner"].includes(admin.userType)) {

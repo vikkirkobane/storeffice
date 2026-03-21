@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, UserX, Mail } from "lucide-react";
 
+// Uses getServerUser which requires cookies - must be dynamic
+export const dynamic = 'force-dynamic';
+
 export default async function AdminUsersPage() {
   const admin = await getServerUser();
   if (!admin || !["admin", "owner"].includes(admin.userType)) {
