@@ -14,11 +14,8 @@ export const profiles = pgTable("profiles", {
     enum: ["customer", "owner", "merchant", "admin"] 
   }).default("customer"),
   // Note: NO passwordHash - Supabase Auth manages passwords in auth.users
-  // Note: NO emailVerified - use is_verified instead (from auth.users.email_confirmed_at)
-  isActive: text("is_active").default("true"), // or boolean? Check actual type
-  // isActive may not exist in current schema - verify
-  // Current schema has is_verified but we're using isActive for custom suspension
-  // If is_active doesn't exist, add it via migration or use is_verified differently
+  // Note: NO emailVerified - use is_verified from auth.users instead
+  isActive: boolean("is_active").default(true), // For account suspension
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
