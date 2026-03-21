@@ -1,3 +1,6 @@
+import { clsx, ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 /**
  * Convert snake_case string to camelCase
  */
@@ -32,9 +35,6 @@ export function toCamelCaseArray<T extends Record<string, any>>(arr: T[]): T[] {
  * Merge Tailwind CSS classes with proper deduplication
  * Combines clsx for conditional classes and tailwind-merge for conflict resolution
  */
-import { clsx, ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
