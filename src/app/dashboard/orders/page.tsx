@@ -42,10 +42,6 @@ export default async function DashboardOrdersPage() {
   // Group by order
   const grouped = new Map();
   for (const row of rawOrders) {
-
-  // Group by order
-  const grouped = new Map();
-  for (const row of orders) {
     const orderId = row.order.id;
     if (!grouped.has(orderId)) {
       grouped.set(orderId, {
