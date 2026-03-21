@@ -76,9 +76,10 @@ export default function MobileNav() {
           <div
             ref={menuRef}
             className={cn(
-              "fixed inset-y-0 right-0 z-50 w-[80vw] max-w-sm bg-slate-950 border-l border-slate-800 md:hidden",
+              "fixed inset-y-0 right-0 z-50 w-[85vw] max-w-sm bg-slate-950 border-l border-slate-800 md:hidden",
               "flex flex-col justify-between transform transition-transform duration-300 ease-in-out",
-              "safe-area-inset-right px-6 py-6",
+              "safe-area-inset-right px-4 py-6 pt-12",
+              "overscroll-y-contain",
               isOpen ? "translate-x-0" : "translate-x-full"
             )}
             role="dialog"

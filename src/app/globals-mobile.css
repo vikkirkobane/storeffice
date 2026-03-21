@@ -1,0 +1,123 @@
+/* Mobile-first responsive fixes */
+
+/* Prevent horizontal scroll */
+html,
+body {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Improve text rendering on mobile */
+body {
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure buttons and inputs have adequate touch targets */
+button,
+input,
+select,
+textarea,
+a[href] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Fix for fixed/sticky elements on mobile */
+header[class*="sticky"],
+footer[class*="sticky"] {
+  position: sticky;
+  z-index: 50;
+}
+
+/* Prevent viewport zoom on input focus on iOS */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+select,
+textarea {
+  font-size: 16px !important;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  body,
+  .safe-area-inset-top {
+    padding-top: max(0px, env(safe-area-inset-top));
+  }
+  .safe-area-inset-bottom {
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+  .safe-area-inset-left {
+    padding-left: max(0px, env(safe-area-inset-left));
+  }
+  .safe-area-inset-right {
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* Hide scrollbar for marquee but keep functionality */
+.animate-marquee {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.animate-marquee::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure images don't cause overflow */
+img,
+picture,
+video,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix for 100vh on mobile browsers (address bar) */
+@supports (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100dvh;
+  }
+  .h-screen {
+    height: 100dvh;
+  }
+}
+
+/* Improve tap highlighting */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Focus styles for better keyboard navigation */
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Smooth scroll anchoring */
+scroll-anchor {
+  scroll-margin-top: 100px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: 0 0% 0%;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

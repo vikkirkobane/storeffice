@@ -53,13 +53,14 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20">
         {/* Deep dark animated background */}
-        <div className="absolute inset-0 z-0 bg-grid-white/[0.02]" />
+        <div className="absolute inset-0 z-0 bg-grid-white/[0.02] pointer-events-none" />
         <motion.div
-          className="absolute inset-0 z-0 opacity-40"
+          className="absolute inset-0 z-0 opacity-40 pointer-events-none"
           style={{ y, opacity }}
         >
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow" />
-          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-teal-600/20 rounded-full blur-[150px] mix-blend-screen animate-pulse-slow" style={{ animationDelay: "2s" }} />
+          {/* Responsive background blobs - smaller on mobile */}
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 md:w-96 md:h-96 bg-emerald-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 md:w-[500px] md:h-[500px] bg-teal-600/20 rounded-full blur-[100px] md:blur-[150px] mix-blend-screen animate-pulse-slow" style={{ animationDelay: "2s" }} />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-full max-h-3xl bg-cyan-900/10 rounded-full blur-[100px]" />
         </motion.div>
 
@@ -75,31 +76,31 @@ export default function HomePage() {
               The Infrastructure of African Commerce
             </Badge>
 
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter leading-[1.1] max-w-5xl mx-auto drop-shadow-2xl">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter leading-[1.1] max-w-5xl mx-auto drop-shadow-2xl">
               Workspace & Storage, <br className="hidden md:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400">
                 Unified.
               </span>
             </h1>
 
-            <p className="mt-6 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed font-light">
+            <p className="mt-6 text-base sm:text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed font-light px-4 sm:px-0">
               Storeffice combines the booking model of Airbnb with the scale of Amazon. Monetize idle office space, rent intelligent storage, and reach customers instantly.
             </p>
 
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 mt-8"
+              className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-2xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <Button asChild size="lg" className="h-14 px-8 text-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] border border-emerald-500/50 rounded-full transition-all group">
-                <Link href="/register" className="flex items-center gap-2">
+              <Button asChild size="lg" className="h-14 px-8 text-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] border border-emerald-500/50 rounded-full transition-all group flex-1 sm:flex-none">
+                <Link href="/register" className="flex items-center gap-2 justify-center">
                   Start Building
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg bg-slate-900/50 hover:bg-slate-800 border-slate-700 text-slate-300 backdrop-blur-md rounded-full">
-                <Link href="#investors">View Traction</Link>
+              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg bg-slate-900/50 hover:bg-slate-800 border-slate-700 text-slate-300 backdrop-blur-md rounded-full flex-1 sm:flex-none">
+                <Link href="#investors" className="justify-center">View Traction</Link>
               </Button>
             </motion.div>
           </motion.div>
@@ -112,7 +113,7 @@ export default function HomePage() {
       {/* Investor Metrics Section */}
       <section id="investors" className="py-20 relative z-20 border-y border-white/5 bg-slate-950/50 backdrop-blur-lg">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {metrics.map((metric, i) => (
               <motion.div
                 key={metric.label}
@@ -120,13 +121,13 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1, duration: 0.6 }}
-                className="flex flex-col items-center md:items-start p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors"
+                className="flex flex-col items-center text-center sm:items-start sm:text-left p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors"
               >
                 <div className={`p-3 rounded-xl bg-white/[0.05] ${metric.color} mb-4`}>
                   <metric.icon className="h-6 w-6" />
                 </div>
-                <h4 className="text-4xl font-bold text-white mb-2">{metric.value}</h4>
-                <p className="text-sm text-slate-400 font-medium uppercase tracking-wider">{metric.label}</p>
+                <h4 className="text-3xl md:text-4xl font-bold text-white mb-2">{metric.value}</h4>
+                <p className="text-xs sm:text-sm text-slate-400 font-medium uppercase tracking-wider">{metric.label}</p>
               </motion.div>
             ))}
           </div>
@@ -232,7 +233,7 @@ export default function HomePage() {
 
       {/* Tech Marquee */}
       <section className="py-10 border-y border-white/5 bg-black/50 overflow-hidden">
-        <div className="flex w-[200%] animate-marquee">
+        <div className="flex w-max min-w-full animate-marquee">
           {[...techStack, ...techStack, ...techStack].map((tech, i) => (
             <div key={i} className="flex-1 flex justify-center text-2xl font-bold text-slate-700 mx-8">
               {tech}
