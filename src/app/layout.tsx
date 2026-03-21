@@ -154,14 +154,17 @@ export default function RootLayout({
           {/* Footer */}
           <footer className="bg-background border-t py-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-                <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-10 mb-10">
+                {/* Brand Column */}
+                <div className="space-y-4 text-center md:text-left">
                   <h3 className="font-bold text-xl text-foreground">Storeffice</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
+                  <p className="text-muted-foreground text-sm leading-relaxed">
                     Unified platform for office spaces, storage, and marketplace solutions. Powering businesses across Africa.
                   </p>
                 </div>
-                <div>
+
+                {/* Product Links */}
+                <div className="text-center md:text-left">
                   <h4 className="font-semibold mb-4 text-foreground">Product</h4>
                   <ul className="space-y-3 text-sm text-muted-foreground">
                     <li><a href="/spaces" className="hover:text-foreground transition-colors">Spaces</a></li>
@@ -171,24 +174,30 @@ export default function RootLayout({
                     <li><a href="/api" className="hover:text-foreground transition-colors">API</a></li>
                   </ul>
                 </div>
-                <div className="space-y-3 text-sm text-muted-foreground">
+
+                {/* Company Links */}
+                <div className="text-center md:text-left">
                   <h4 className="font-semibold mb-4 text-foreground">Company</h4>
-                  <li><a href="/about" className="hover:text-foreground transition-colors">About</a></li>
-                  <li><a href="/contact" className="hover:text-foreground transition-colors">Contact</a></li>
-                  <li><a href="/careers" className="hover:text-foreground transition-colors">Careers</a></li>
-                  <li><a href="/legal/privacy" className="hover:text-foreground transition-colors">Privacy</a></li>
-                  <li><a href="/legal/terms" className="hover:text-foreground transition-colors">Terms</a></li>
+                  <ul className="space-y-3 text-sm text-muted-foreground">
+                    <li><a href="/about" className="hover:text-foreground transition-colors">About</a></li>
+                    <li><a href="/contact" className="hover:text-foreground transition-colors">Contact</a></li>
+                    <li><a href="/careers" className="hover:text-foreground transition-colors">Careers</a></li>
+                    <li><a href="/legal/privacy" className="hover:text-foreground transition-colors">Privacy</a></li>
+                    <li><a href="/legal/terms" className="hover:text-foreground transition-colors">Terms</a></li>
+                  </ul>
                 </div>
-                <div>
+
+                {/* Contact Info */}
+                <div className="text-center md:text-left">
                   <h4 className="font-semibold mb-4 text-foreground">Contact</h4>
                   <ul className="space-y-3 text-sm text-muted-foreground">
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center md:justify-start gap-2">
                       <Mail className="h-4 w-4 text-primary flex-shrink-0" /> support@storeffice.com
                     </li>
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center md:justify-start gap-2">
                       <Phone className="h-4 w-4 text-primary flex-shrink-0" /> +1 (555) 123-4567
                     </li>
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center justify-center md:justify-start gap-2">
                       <MapPin className="h-4 w-4 text-primary flex-shrink-0" /> Nairobi, Kenya
                     </li>
                   </ul>
