@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClientSupabase } from "@/lib/supabase";
+import { createClientSupabase } from "@/lib/supabase-server";
 
 /**
  * POST /api/auth/login

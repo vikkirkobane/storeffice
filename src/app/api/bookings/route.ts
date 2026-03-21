@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db, schema } from "@/lib/db";
 import { eq, and, sql } from "drizzle-orm";
-import { createClientSupabase } from "@/lib/supabase";
+import { createClientSupabase } from "@/lib/supabase-server";
 import { initializePaystackTransaction } from "@/lib/paystack";
 import { sendEmail } from "@/services/email-service";
 

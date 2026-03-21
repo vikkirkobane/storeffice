@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db";
 import { eq, and, sql } from "drizzle-orm";
-import { createClientSupabase } from "@/lib/supabase";
+import { createClientSupabase } from "@/lib/supabase-server";
 
 /**
  * GET /api/dashboard/stats

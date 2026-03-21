@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { rateLimit, getRateLimitKey, getClientIp } from "@/lib/rate-limit";
-import { createClientSupabase } from "@/lib/supabase";
+import { createClientSupabase } from "@/lib/supabase-server";
 
 // Public routes that don't require authentication
 const publicRoutes = [

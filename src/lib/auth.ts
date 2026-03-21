@@ -1,4 +1,4 @@
-import { createClientSupabase } from "@/lib/supabase";
+import { createClientSupabase } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 
 export interface UserProfile {
