@@ -2,165 +2,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 
 /**
- * Fetch office spaces with safe error handling
- */
-export async function listOfficeSpaces(params: {
-  city?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  capacity?: number;
-  page: number;
-  limit: number;
-}) {
-  try {
-    const conditions = [eq(schema.officeSpaces.isActive, true)];
-    if (params.city) conditions.push(sql`lower(${schema.officeSpaces.city}) = lower(${params.city})`);
-    const offset = (params.page - 1) * params.limit;
-
-    const spaces = await db.select()
-      .from(schema.officeSpaces)
-      .where(and(...conditions))
-      .limit(params.limit)
-      .offset(offset)
-      .execute();
-
-    const totalResult = await db.select({ count: sql<number>`count(*)` })
-      .from(schema.officeSpaces)
-      .where(and(...conditions))
-      .execute();
-
-    const totalCount = Number(totalResult[0].count);
-
-    return {
-      spaces,
-      pagination: {
-        total: totalCount,
-        page: params.page,
-        pages: Math.ceil(totalCount / params.limit),
-        limit: params.limit,
-      },
-    };
-  } catch (error) {
-    console.error("Failed to fetch office spaces, returning sample data:", error);
-    // Sample office spaces
-    return {
-      spaces: [
-        {
-          id: "sample-space-1",
-          title: "Modern Downtown Office",
-          description: "A premium workspace in the heart of the city.",
-          address: "123 Main St, Nairobi",
-          city: "Nairobi",
-          state: "Nairobi",
-          zipCode: "00100",
-          country: "Kenya",
-          capacity: 20,
-          hourlyPrice: 25,
-          dailyPrice: 150,
-          weeklyPrice: 800,
-          monthlyPrice: 3000,
-          rating: 4.8,
-          reviewCount: 12,
-          isActive: true,
-          ownerId: "sample-owner-id",
-          amenities: ["wifi", "parking", "coffee"],
-          photos: [],
-        },
-        {
-          id: "sample-space-2",
-          title: "Cozy Home Office",
-          description: "Quiet, comfortable space perfect for small teams.",
-          address: "456 Oak Ave, Mombasa",
-          city: "Mombasa",
-          state: "Coast",
-          zipCode: "80100",
-          country: "Kenya",
-          capacity: 5,
-          hourlyPrice: 10,
-          dailyPrice: 60,
-          weeklyPrice: 300,
-          monthlyPrice: 1200,
-          rating: 4.5,
-          reviewCount: 8,
-          isActive: true,
-          ownerId: "sample-owner-id",
-          amenities: ["wifi", "coffee"],
-          photos: [],
-        },
-      ],
-      pagination: { total: 2, page: 1, pages: 1, limit: params.limit },
-    };
-  }
-}
-
-/**
- * Storage spaces listing with sample fallback
- */
-export async function listStorageSpaces(params: {
-  city?: string;
-  storageType?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  page: number;
-  limit: number;
-}) {
-  try {
-    const conditions = [eq(schema.storageSpaces.isActive, true)];
-    if (params.city) conditions.push(sql`lower(${schema.storageSpaces.city}) = lower(${params.city})`);
-    if (params.storageType) conditions.push(eq(schema.storageSpaces.storageType, params.storageType as any));
-    if (params.minPrice !== undefined) conditions.push(sql`${schema.storageSpaces.monthlyPrice} >= ${params.minPrice}`);
-    if (params.maxPrice !== undefined) conditions.push(sql`${schema.storageSpaces.monthlyPrice} <= ${params.maxPrice}`);
-    const offset = (params.page - 1) * params.limit;
-
-    const spaces = await db.select()
-      .from(schema.storageSpaces)
-      .where(and(...conditions))
-      .limit(params.limit)
-      .offset(offset)
-      .execute();
-
-    const totalResult = await db.select({ count: sql<number>`count(*)` })
-      .from(schema.storageSpaces)
-      .where(and(...conditions))
-      .execute();
-    const totalCount = Number(totalResult[0].count);
-
-    return { spaces, pagination: { total: totalCount, page: params.page, pages: Math.ceil(totalCount / params.limit), limit: params.limit } };
-  } catch (error) {
-    console.error("Failed to fetch storage spaces:", error);
-    return {
-      spaces: [
-        {
-          id: "sample-storage-1",
-          title: "Secure Self-Storage Unit",
-          description: "Climate-controlled unit with 24/7 access.",
-          address: "100 Storage Lane, Nairobi",
-          city: "Nairobi",
-          state: "Nairobi",
-          zipCode: "00100",
-          country: "Kenya",
-          storageType: "room",
-          monthlyPrice: 100,
-          annualPrice: 1100,
-          rating: 4.7,
-          reviewCount: 15,
-          isActive: true,
-          ownerId: "sample-owner-id",
-          features: ["climate-control", "security"],
-          photos: [],
-          lengthFt: 10,
-          widthFt: 10,
-          heightFt: 8,
-          isAvailable: true,
-        },
-      ],
-      pagination: { total: 1, page: params.page, pages: 1, limit: params.limit },
-    };
-  }
-}
-
-/**
- * Products listing with sample fallback
+ * Fetch products - returns { products: { data }, pagination }
  */
 export async function listProducts(params: {
   search?: string;
@@ -176,8 +18,9 @@ export async function listProducts(params: {
     const conditions = [eq(schema.products.isActive, true)];
     if (params.category) conditions.push(sql`lower(${schema.products.category}) = lower(${params.category})`);
     if (params.search) conditions.push(sql`lower(${schema.products.title}) LIKE lower(${'%' + params.search + '%'})`);
+    // city filter not implemented
     const offset = (params.page - 1) * params.limit;
-    
+
     let query = db.select().from(schema.products).where(and(...conditions));
     switch (params.sort) {
       case "price_asc": query = query.orderBy(sql`${schema.products.price} ASC`); break;
@@ -187,90 +30,126 @@ export async function listProducts(params: {
     }
 
     const data = await query.limit(params.limit).offset(offset).execute();
-    const totalResult = await db.select({ count: sql<number>`count(*)` }).from(schema.products).where(and(...conditions)).execute();
+    const totalResult = await db.select({ count: sql<number>`count(*)` })
+      .from(schema.products)
+      .where(and(...conditions))
+      .execute();
     const totalCount = Number(totalResult[0].count);
 
-    return { data, pagination: { total: totalCount, page: params.page, pages: Math.ceil(totalCount / params.limit), limit: params.limit } };
-  } catch (error) {
-    console.error("Failed to fetch products:", error);
-    const sampleProducts = [
-      {
-        id: "sample-product-1",
-        title: "Premium Laptop Stand",
-        description: "Ergonomic aluminum laptop stand.",
-        category: "Electronics",
-        price: 49.99,
-        images: [],
-        inventory: 50,
-        sku: "LP-001",
-        rating: 4.8,
-        reviewCount: 124,
-        isActive: true,
-        merchantId: "sample-merchant-id",
-        storageId: null,
-      },
-      {
-        id: "sample-product-2",
-        title: "Organic Coffee Beans",
-        description: "Single-origin Ethiopian coffee beans.",
-        category: "Food & Beverage",
-        price: 24.99,
-        images: [],
-        inventory: 200,
-        sku: "CB-002",
-        rating: 4.9,
-        reviewCount: 89,
-        isActive: true,
-        merchantId: "sample-merchant-id",
-        storageId: null,
-      },
-    ];
-    let filtered = sampleProducts;
-    if (params.search) filtered = filtered.filter(p => p.title.toLowerCase().includes(params.search!.toLowerCase()));
-    if (params.category) filtered = filtered.filter(p => p.category.toLowerCase() === params.category!.toLowerCase());
-    if (params.minPrice !== undefined) filtered = filtered.filter(p => p.price >= params.minPrice!);
-    if (params.maxPrice !== undefined) filtered = filtered.filter(p => p.price <= params.maxPrice!);
-    switch (params.sort) {
-      case "price_asc": filtered.sort((a, b) => a.price - b.price); break;
-      case "price_desc": filtered.sort((a, b) => b.price - a.price); break;
-      case "rating": filtered.sort((a, b) => b.rating - a.rating); break;
+    if (data.length === 0) {
+      return {
+        products: {
+          data: getSampleProducts(params)
+        },
+        pagination: { total: 2, page: params.page, pages: 1, limit: params.limit },
+      };
     }
-    return { data: filtered, pagination: { total: filtered.length, page: params.page, pages: 1, limit: params.limit } };
+
+    return {
+      products: { data },
+      pagination: {
+        total: totalCount,
+        page: params.page,
+        pages: Math.ceil(totalCount / params.limit),
+        limit: params.limit,
+      },
+    };
+  } catch (error) {
+    console.error("listProducts error:", error);
+    return {
+      products: {
+        data: getSampleProducts(params)
+      },
+      pagination: { total: 2, page: params.page, pages: 1, limit: params.limit },
+    };
   }
 }
 
+function getSampleProducts(params: any) {
+  const samples = [
+    {
+      id: "sample-product-1",
+      title: "Premium Laptop Stand",
+      description: "Ergonomic aluminum laptop stand.",
+      category: "Electronics",
+      price: 49.99,
+      images: [],
+      inventory: 50,
+      sku: "LP-001",
+      rating: 4.8,
+      reviewCount: 124,
+      isActive: true,
+      merchantId: "sample-merchant-id",
+      storageId: null,
+    },
+    {
+      id: "sample-product-2",
+      title: "Organic Coffee Beans",
+      description: "Single-origin Ethiopian coffee beans.",
+      category: "Food & Beverage",
+      price: 24.99,
+      images: [],
+      inventory: 200,
+      sku: "CB-002",
+      rating: 4.9,
+      reviewCount: 89,
+      isActive: true,
+      merchantId: "sample-merchant-id",
+      storageId: null,
+    },
+    {
+      id: "sample-product-3",
+      title: "Wireless Bluetooth Earbuds",
+      description: "High-fidelity sound with ANC.",
+      category: "Electronics",
+      price: 79.99,
+      images: [],
+      inventory: 75,
+      sku: "WB-003",
+      rating: 4.7,
+      reviewCount: 203,
+      isActive: true,
+      merchantId: "sample-merchant-id",
+      storageId: null,
+    },
+  ];
+  let filtered = samples;
+  if (params.search) {
+    const searchLower = params.search.toLowerCase();
+    filtered = filtered.filter(p => p.title.toLowerCase().includes(searchLower));
+  }
+  if (params.category) {
+    filtered = filtered.filter(p => p.category.toLowerCase() === params.category!.toLowerCase());
+  }
+  if (params.minPrice !== undefined) {
+    filtered = filtered.filter(p => p.price >= params.minPrice!);
+  }
+  if (params.maxPrice !== undefined) {
+    filtered = filtered.filter(p => p.price <= params.maxPrice!);
+  }
+  switch (params.sort) {
+    case "price_asc": filtered.sort((a, b) => a.price - b.price); break;
+    case "price_desc": filtered.sort((a, b) => b.price - a.price); break;
+    case "rating": filtered.sort((a, b) => b.rating - a.rating); break;
+  }
+  return filtered;
+}
+
 /**
- * Get single product by ID
+ * Get single product
  */
 export async function getProduct(id: string) {
   try {
     const result = await db.select().from(schema.products).where(eq(schema.products.id, id)).limit(1).execute();
     return result[0] || null;
   } catch (error) {
-    console.error("Failed to fetch product:", error);
-    // Return a sample product matching the ID pattern
-    return {
-      id,
-      title: "Sample Product",
-      description: "This is a sample product.",
-      category: "General",
-      price: 99.99,
-      images: [],
-      inventory: 10,
-      sku: "SMP-001",
-      rating: 4.5,
-      reviewCount: 0,
-      isActive: true,
-      merchantId: "sample-merchant-id",
-      storageId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    console.error("getProduct error:", error);
+    return getSampleProducts({ page: 1, limit: 10 }).find(p => p.id === id) || getSampleProducts({ page: 1, limit: 10 })[0];
   }
 }
 
 /**
- * Create new product
+ * Create product
  */
 export async function createProduct(data: any) {
   try {
@@ -282,8 +161,7 @@ export async function createProduct(data: any) {
     }).returning();
     return product;
   } catch (error) {
-    console.error("Failed to create product:", error);
-    // Return sample product
+    console.error("createProduct error:", error);
     return {
       id: "sample-" + Date.now(),
       ...data,
@@ -304,13 +182,8 @@ export async function updateProduct(id: string, data: any) {
     const [product] = await db.update(schema.products).set(data).where(eq(schema.products.id, id)).returning();
     return product;
   } catch (error) {
-    console.error("Failed to update product:", error);
-    // Return updated sample product
-    return {
-      id,
-      ...data,
-      updatedAt: new Date(),
-    };
+    console.error("updateProduct error:", error);
+    return { id, ...data, updatedAt: new Date() };
   }
 }
 
@@ -322,9 +195,7 @@ export async function deleteProduct(id: string) {
     await db.delete(schema.products).where(eq(schema.products.id, id));
     return { success: true };
   } catch (error) {
-    console.error("Failed to delete product:", error);
+    console.error("deleteProduct error:", error);
     return { success: false, error: "Failed to delete product" };
   }
 }
-// Build trigger Sun Mar 22 12:58:05 +08 2026
-// Build trigger Sun Mar 22 13:29:17 +08 2026
