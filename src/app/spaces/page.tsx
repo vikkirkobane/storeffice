@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Users, DollarSign } from "lucide-react";
+import Link from "next/link";
 
 interface SpacesPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -91,8 +92,8 @@ export default async function SpacesPage({ searchParams }: SpacesPageProps) {
                 </div>
                 
                 <Button type="submit" className="w-full">Apply Filters</Button>
-                <Button type="button" variant="outline" className="w-full" onClick={() => { window.location.href = "/spaces"; }}>
-                  Clear
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/spaces">Clear</Link>
                 </Button>
               </form>
             </div>

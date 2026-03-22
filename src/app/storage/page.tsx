@@ -78,10 +78,8 @@ export default async function StoragePage({ searchParams }: StoragePageProps) {
                   <Input id="maxPrice" name="maxPrice" type="number" defaultValue={maxPrice || ""} />
                 </div>
                 <Button type="submit" className="w-full">Apply Filters</Button>
-                <Button type="button" variant="outline" className="w-full" onClick={() => {
-                  window.location.href = "/storage";
-                }}>
-                  Clear
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/storage">Clear</Link>
                 </Button>
               </form>
             </div>
