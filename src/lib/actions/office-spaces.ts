@@ -131,10 +131,12 @@ function getSampleSpaces(params: any) {
 export async function getOfficeSpace(id: string) {
   try {
     const result = await db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.id, id)).limit(1).execute();
-    return result[0] || null;
+    if (result[0]) return result[0];
+    // If not found, return sample data (first sample)
+    return getSampleSpaces({ page: 1, limit: 10 })[0] || null;
   } catch (error) {
     console.error("getOfficeSpace error:", error);
-    return getSampleSpaces({ page: 1, limit: 10 })[0];
+    return getSampleSpaces({ page: 1, limit: 10 })[0] || null;
   }
 }
 

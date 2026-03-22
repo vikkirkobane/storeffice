@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { db, schema } from "@/lib/db";
-import { eq } from "drizzle-orm";
+import { getStorageSpace } from "@/lib/actions/storage-spaces";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -8,9 +7,16 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata({ params }: PageProps) {
+  const { id } = await params;
+  const space = await getStorageSpace(id);
+  if (!space) return { title: "Space not found" };
+  return { title: space.title };
+}
+
 export default async function StorageDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const [space] = await db.select().from(schema.storageSpaces).where(eq(schema.storageSpaces.id, id)).limit(1);
+  const space = await getStorageSpace(id);
 
   if (!space) notFound();
 

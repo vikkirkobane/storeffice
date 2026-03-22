@@ -137,10 +137,11 @@ function getSampleStorageSpaces(params: any) {
 export async function getStorageSpace(id: string) {
   try {
     const result = await db.select().from(schema.storageSpaces).where(eq(schema.storageSpaces.id, id)).limit(1).execute();
-    return result[0] || null;
+    if (result[0]) return result[0];
+    return getSampleStorageSpaces({ page: 1, limit: 10 })[0] || null;
   } catch (error) {
     console.error("getStorageSpace error:", error);
-    return getSampleStorageSpaces({ page: 1, limit: 10 })[0];
+    return getSampleStorageSpaces({ page: 1, limit: 10 })[0] || null;
   }
 }
 

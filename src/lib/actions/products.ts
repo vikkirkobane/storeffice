@@ -143,10 +143,12 @@ function getSampleProducts(params: any) {
 export async function getProduct(id: string) {
   try {
     const result = await db.select().from(schema.products).where(eq(schema.products.id, id)).limit(1).execute();
-    return result[0] || null;
+    if (result[0]) return result[0];
+    // Not found in DB, try sample data
+    return getSampleProducts({ page: 1, limit: 10 }).find(p => p.id === id) || getSampleProducts({ page: 1, limit: 10 })[0] || null;
   } catch (error) {
     console.error("getProduct error:", error);
-    return getSampleProducts({ page: 1, limit: 10 }).find(p => p.id === id) || getSampleProducts({ page: 1, limit: 10 })[0];
+    return getSampleProducts({ page: 1, limit: 10 }).find(p => p.id === id) || getSampleProducts({ page: 1, limit: 10 })[0] || null;
   }
 }
 

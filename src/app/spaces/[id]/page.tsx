@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { db, schema } from "@/lib/db";
-import { eq } from "drizzle-orm";
+import { getOfficeSpace } from "@/lib/actions/office-spaces";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -10,14 +10,14 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
-  const [space] = await db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.id, id)).limit(1);
+  const space = await getOfficeSpace(id);
   if (!space) return { title: "Space not found" };
   return { title: space.title };
 }
 
 export default async function SpaceDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const [space] = await db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.id, id)).limit(1);
+  const space = await getOfficeSpace(id);
 
   if (!space) notFound();
 

@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { db, schema } from "@/lib/db";
-import { eq } from "drizzle-orm";
+import { getProduct } from "@/lib/actions/products";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,9 +8,16 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata({ params }: PageProps) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  if (!product) return { title: "Product not found" };
+  return { title: product.title };
+}
+
 export default async function ProductDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const [product] = await db.select().from(schema.products).where(eq(schema.products.id, id)).limit(1);
+  const product = await getProduct(id);
 
   if (!product) notFound();
 
