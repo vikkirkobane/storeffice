@@ -138,10 +138,13 @@ export async function getStorageSpace(id: string) {
   try {
     const result = await db.select().from(schema.storageSpaces).where(eq(schema.storageSpaces.id, id)).limit(1).execute();
     if (result[0]) return result[0];
-    return getSampleStorageSpaces({ page: 1, limit: 10 })[0] || null;
+    const samples = getSampleStorageSpaces({ page: 1, limit: 10 });
+    const match = samples.find(s => s.id === id);
+    return match || samples[0] || null;
   } catch (error) {
     console.error("getStorageSpace error:", error);
-    return getSampleStorageSpaces({ page: 1, limit: 10 })[0] || null;
+    const samples = getSampleStorageSpaces({ page: 1, limit: 10 });
+    return samples.find(s => s.id === id) || samples[0] || null;
   }
 }
 

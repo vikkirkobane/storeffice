@@ -132,11 +132,14 @@ export async function getOfficeSpace(id: string) {
   try {
     const result = await db.select().from(schema.officeSpaces).where(eq(schema.officeSpaces.id, id)).limit(1).execute();
     if (result[0]) return result[0];
-    // If not found, return sample data (first sample)
-    return getSampleSpaces({ page: 1, limit: 10 })[0] || null;
+    // Not found in DB, try to match sample data by ID
+    const samples = getSampleSpaces({ page: 1, limit: 10 });
+    const match = samples.find(s => s.id === id);
+    return match || samples[0] || null;
   } catch (error) {
     console.error("getOfficeSpace error:", error);
-    return getSampleSpaces({ page: 1, limit: 10 })[0] || null;
+    const samples = getSampleSpaces({ page: 1, limit: 10 });
+    return samples.find(s => s.id === id) || samples[0] || null;
   }
 }
 
