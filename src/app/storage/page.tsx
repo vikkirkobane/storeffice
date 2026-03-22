@@ -10,6 +10,9 @@ interface StoragePageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function StoragePage({ searchParams }: StoragePageProps) {
   const params = await searchParams;
   const city = typeof params.city === "string" ? params.city : undefined;

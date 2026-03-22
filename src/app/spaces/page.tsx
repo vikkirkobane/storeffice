@@ -9,6 +9,9 @@ interface SpacesPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function SpacesPage({ searchParams }: SpacesPageProps) {
   const params = await searchParams;
   const city = typeof params.city === "string" ? params.city : undefined;
