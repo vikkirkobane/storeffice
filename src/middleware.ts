@@ -14,7 +14,25 @@ const publicRoutes = [
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
   "/api/auth/verify-email",
-  "/api/health", // health check endpoint
+  "/api/health",
+  // Public pages
+  "/",
+  "/spaces",
+  "/storage",
+  "/products",
+  "/about",
+  "/contact",
+  "/legal",
+  "/legal/privacy",
+  "/legal/terms",
+  // Public dynamic routes
+  "/spaces/",
+  "/storage/",
+  "/products/",
+  // Payment/callback pages
+  "/order/success",
+  "/payment/failed",
+  "/booking/success",
 ];
 
 /**
