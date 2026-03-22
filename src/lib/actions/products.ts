@@ -186,11 +186,11 @@ export async function listProducts(params: {
       default: query = query.orderBy(sql`${schema.products.createdAt} DESC`);
     }
 
-    const products = await query.limit(params.limit).offset(offset).execute();
+    const data = await query.limit(params.limit).offset(offset).execute();
     const totalResult = await db.select({ count: sql<number>`count(*)` }).from(schema.products).where(and(...conditions)).execute();
     const totalCount = Number(totalResult[0].count);
 
-    return { products, pagination: { total: totalCount, page: params.page, pages: Math.ceil(totalCount / params.limit), limit: params.limit } };
+    return { data, pagination: { total: totalCount, page: params.page, pages: Math.ceil(totalCount / params.limit), limit: params.limit } };
   } catch (error) {
     console.error("Failed to fetch products:", error);
     const sampleProducts = [
@@ -235,7 +235,7 @@ export async function listProducts(params: {
       case "price_desc": filtered.sort((a, b) => b.price - a.price); break;
       case "rating": filtered.sort((a, b) => b.rating - a.rating); break;
     }
-    return { products: filtered, pagination: { total: filtered.length, page: params.page, pages: 1, limit: params.limit } };
+    return { data: filtered, pagination: { total: filtered.length, page: params.page, pages: 1, limit: params.limit } };
   }
 }
 // Build trigger Sun Mar 22 12:58:05 +08 2026
