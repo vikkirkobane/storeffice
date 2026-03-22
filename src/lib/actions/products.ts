@@ -104,10 +104,7 @@ export async function listProducts(params: {
     if (params.search) {
       conditions.push(sql`lower(${schema.products.title}) LIKE lower(${'%' + params.search + '%'})`);
     }
-    if (params.city) {
-      // Note: Products aren't directly linked to cities in schema, but we could join with storage_spaces if needed.
-      // For now, keeping it as a placeholder or removing if not applicable.
-    }
+    // city filter not implemented (products not directly linked to cities)
 
     const offset = (params.page - 1) * params.limit;
     
@@ -148,6 +145,7 @@ export async function listProducts(params: {
     };
   } catch (error) {
     console.error("Failed to fetch products, returning sample data:", error);
+    
     // Sample product data
     const sampleProducts = [
       {
