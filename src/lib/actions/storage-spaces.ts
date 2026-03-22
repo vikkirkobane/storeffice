@@ -35,15 +35,13 @@ export async function listStorageSpaces(params: {
 
     if (data.length === 0) {
       return {
-        storageSpaces: {
-          data: getSampleStorageSpaces(params)
-        },
+        storageSpaces: getSampleStorageSpaces(params),
         pagination: { total: 2, page: params.page, pages: 1, limit: params.limit },
       };
     }
 
     return {
-      storageSpaces: { data },
+      storageSpaces: data,
       pagination: {
         total: totalCount,
         page: params.page,
@@ -54,9 +52,7 @@ export async function listStorageSpaces(params: {
   } catch (error) {
     console.error("listStorageSpaces error:", error);
     return {
-      storageSpaces: {
-        data: getSampleStorageSpaces(params)
-      },
+      storageSpaces: getSampleStorageSpaces(params),
       pagination: { total: 2, page: params.page, pages: 1, limit: params.limit },
     };
   }

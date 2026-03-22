@@ -17,7 +17,7 @@ export default async function StoragePage({ searchParams }: StoragePageProps) {
   const minPrice = typeof params.minPrice === "string" ? Number(params.minPrice) : undefined;
   const maxPrice = typeof params.maxPrice === "string" ? Number(params.maxPrice) : undefined;
   
-  const { spaces, pagination } = await listStorageSpaces({
+  const { storageSpaces: spaces, pagination } = await listStorageSpaces({
     city,
     storageType,
     minPrice,

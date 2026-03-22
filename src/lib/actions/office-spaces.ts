@@ -32,16 +32,14 @@ export async function listOfficeSpaces(params: {
 
     // If no data, return sample
     if (data.length === 0) {
-      return { 
-        spaces: { 
-          data: getSampleSpaces(params) 
-        }, 
-        pagination: { total: 2, page: params.page, pages: 1, limit: params.limit } 
+      return {
+        spaces: getSampleSpaces(params),
+        pagination: { total: 2, page: params.page, pages: 1, limit: params.limit }
       };
     }
 
     return {
-      spaces: { data },
+      spaces: data,
       pagination: {
         total: totalCount,
         page: params.page,
@@ -52,9 +50,7 @@ export async function listOfficeSpaces(params: {
   } catch (error) {
     console.error("listOfficeSpaces error:", error);
     return {
-      spaces: { 
-        data: getSampleSpaces(params) 
-      },
+      spaces: getSampleSpaces(params),
       pagination: { total: 2, page: params.page, pages: 1, limit: params.limit },
     };
   }

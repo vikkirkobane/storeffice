@@ -38,15 +38,13 @@ export async function listProducts(params: {
 
     if (data.length === 0) {
       return {
-        products: {
-          data: getSampleProducts(params)
-        },
+        products: getSampleProducts(params),
         pagination: { total: 2, page: params.page, pages: 1, limit: params.limit },
       };
     }
 
     return {
-      products: { data },
+      products: data,
       pagination: {
         total: totalCount,
         page: params.page,
@@ -57,9 +55,7 @@ export async function listProducts(params: {
   } catch (error) {
     console.error("listProducts error:", error);
     return {
-      products: {
-        data: getSampleProducts(params)
-      },
+      products: getSampleProducts(params),
       pagination: { total: 2, page: params.page, pages: 1, limit: params.limit },
     };
   }
