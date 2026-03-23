@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getStorageSpace } from "@/lib/actions/storage-spaces";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface PageProps {
   params: Promise<{ id: string }>;
