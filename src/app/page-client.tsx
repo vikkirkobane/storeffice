@@ -88,19 +88,19 @@ export default function HomePage() {
             </p>
 
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-2xl"
+              className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-2xl justify-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
               <Button asChild size="lg" className="h-14 px-8 text-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] border border-emerald-500/50 rounded-full transition-all group flex-1 sm:flex-none">
                 <Link href="/register" className="flex items-center gap-2 justify-center">
-                  Start Building
+                  List Your Space & Products
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg bg-slate-900/50 hover:bg-slate-800 border-slate-700 text-slate-300 backdrop-blur-md rounded-full flex-1 sm:flex-none">
-                <Link href="#investors" className="justify-center">View Traction</Link>
+                <Link href="#investors" className="justify-center">View Platform Metrics</Link>
               </Button>
             </motion.div>
           </motion.div>
