@@ -10,7 +10,10 @@
 All critical tasks are complete. Storeffice is ready for production deployment with documentation and legal compliance in place.
 
 **Recent Fix (2026-03-24):**
-- Updated Supabase client imports to use `createBrowserClient` and `createServerClient` from `@supabase/ssr` v0.9.0 to resolve build error: `createClient is not a function`.
+- Updated Supabase client imports for compatibility with `@supabase/ssr` v0.9.0:
+  - `src/lib/supabase-client.ts`: Use `createBrowserClient as createClient`
+  - `src/lib/supabase-server.ts`: Use `createServerClient` directly (the package does not export `createClient`)
+- Resolved build error: `TypeError: (0 , d.createClient) is not a function` in `/login` page and `/api/auth/session` route.
 
 ---
 
