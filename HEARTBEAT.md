@@ -9,11 +9,31 @@
 
 All critical tasks are complete. Storeffice is ready for production deployment with documentation and legal compliance in place.
 
-**Recent Fix (2026-03-24):**
-- Updated Supabase client imports for compatibility with `@supabase/ssr` v0.9.0:
-  - `src/lib/supabase-client.ts`: Use `createBrowserClient as createClient`
-  - `src/lib/supabase-server.ts`: Use `createServerClient` directly (the package does not export `createClient`)
-- Resolved build error: `TypeError: (0 , d.createClient) is not a function` in `/login` page and `/api/auth/session` route.
+**Critical Fixes (2026-03-24):**
+
+1. **Supabase Admin Client Implementation**
+   - Created `src/lib/supabase-admin.ts` using `SUPABASE_SERVICE_ROLE_KEY`
+   - Required for server-side admin operations: `auth.admin.*` methods
+   - Updated routes: `/api/auth/register`, `/api/admin/users/[id]/verify`
+   - Updated `src/lib/auth-core.ts` functions `getUserById` and `getUserByEmail`
+
+2. **Dashboard Access Fix**
+   - Fixed `src/app/api/dashboard/stats/route.ts`: `profile.user_type` instead of `profile.userType` (snake_case field)
+   - Fixed `src/app/api/auth/login/route.ts`: returns 401 if profile missing to prevent crash
+
+3. **Deployment Requirement**
+   - **Must set `SUPABASE_SERVICE_ROLE_KEY` in Vercel environment variables** (see checklist below)
+   - Without this key, registration and admin features fail
+
+**Build Fix (Earlier 2026-03-24):**
+- Updated Supabase client imports for `@supabase/ssr` v0.9.0:
+  - `src/lib/supabase-client.ts`: `createBrowserClient as createClient`
+  - `src/lib/supabase-server.ts`: `createServerClient` directly
+- Resolved: `TypeError: (0 , d.createClient) is not a function`
+
+---
+
+**Latest commit:** `63962f5` – Admin client + dashboard fixes
 
 ---
 
@@ -68,6 +88,7 @@ These enhancements can be scheduled in later sprints without blocking launch.
 DATABASE_URL=postgresql://...
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...   # REQUIRED for admin operations (register, admin endpoints)
 AUTH_SECRET=...
 AUTH_TRUSTED_ORIGINS=https://yourdomain.com
 STRIPE_SECRET_KEY=sk_...
