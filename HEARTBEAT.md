@@ -9,6 +9,9 @@
 
 All critical tasks are complete. Storeffice is ready for production deployment with documentation and legal compliance in place.
 
+**Recent Fix (2026-03-24):**
+- Updated Supabase client imports to use `createBrowserClient` and `createServerClient` from `@supabase/ssr` v0.9.0 to resolve build error: `createClient is not a function`.
+
 ---
 
 ## Completed Tasks
