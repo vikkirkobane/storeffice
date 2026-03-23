@@ -39,6 +39,14 @@ export async function POST(request: NextRequest) {
       .eq("id", data.user.id)
       .single();
 
+    if (!profile) {
+      // Profile not found - user must be created through registration flow
+      return NextResponse.json(
+        { error: "User profile not found. Please complete registration." },
+        { status: 401 }
+      );
+    }
+
     const response = NextResponse.json({
       user: {
         ...profile,

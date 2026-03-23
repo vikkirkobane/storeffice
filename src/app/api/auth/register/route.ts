@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientSupabase } from "@/lib/supabase-server";
+import { createAdminSupabase } from "@/lib/supabase-admin";
 import { insertProfileSchema } from "@/lib/db/schema";
 import { z } from "zod";
 
@@ -21,10 +22,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = registerSchema.parse(body);
 
-    const supabase = await createClientSupabase();
+    // Use admin client for user management
+    const supabaseAdmin = createAdminSupabase();
 
     // Check if user already exists (via auth.users)
-    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
     if (existingUsers.users.some((u) => u.email === validated.email)) {
       return NextResponse.json(
         { error: "Email already registered" },
@@ -32,8 +34,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create auth user with Supabase Auth
-    const { data: authData, error: signUpError } = await supabase.auth.admin.createUser({
+    // Create auth user with Supabase Auth using admin client
+    const { data: authData, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
       email: validated.email,
       password: validated.password,
       email_confirm: false, // require verification
@@ -53,7 +55,11 @@ export async function POST(request: NextRequest) {
 
     const newUserId = authData.user.id;
 
-    // Create profile record
+    // Use regular client (with cookies) for inserting profile, respecting RLS if needed
+    // Since this is server-side, we can use anon key; but we are inserting into profiles table
+    // We'll use the regular supabase client; it should work because we are inserting the user's own profile
+    const supabase = await createClientSupabase();
+
     const { error: profileError } = await supabase
       .from("profiles")
       .insert({
@@ -69,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     if (profileError) {
       // Cleanup: delete auth user if profile creation fails
-      await supabase.auth.admin.deleteUser(newUserId);
+      await supabaseAdmin.auth.admin.deleteUser(newUserId);
       console.error("Profile creation error:", profileError);
       return NextResponse.json(
         { error: "Failed to create profile" },
@@ -77,10 +83,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Optionally: Send email verification via Supabase (if email confirmation required)
-    // Supabase can send confirmation emails automatically based on auth settings
-
-    // Auto-sign-in after registration (optional)
+    // Auto-sign-in after registration using admin client? Or regular?
+    // We should sign in with the regular client so session is cookie-based
     const { data: sessionData } = await supabase.auth.signInWithPassword({
       email: validated.email,
       password: validated.password,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { createClientSupabase } from "@/lib/supabase-server";
+import { createAdminSupabase } from "@/lib/supabase-admin";
 
 /**
  * POST /api/admin/users/:id/verify
@@ -32,9 +33,11 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // With Supabase Auth, email verification is handled automatically via email confirmations.
-    // This endpoint can be used to manually verify a user's email if needed by setting email_confirmed_at.
-    const { error } = await supabase.auth.admin.updateUserById(targetUserId, {
+    // Use admin client for admin operation
+    const adminSupabase = createAdminSupabase();
+
+    // Manually verify user's email by setting email_confirmed_at
+    const { error } = await adminSupabase.auth.admin.updateUserById(targetUserId, {
       email_confirmed_at: new Date().toISOString(),
     });
 

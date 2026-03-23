@@ -1,4 +1,5 @@
 import { createClientSupabase } from "@/lib/supabase-server";
+import { createAdminSupabase } from "@/lib/supabase-admin";
 import { cookies } from "next/headers";
 
 /**
@@ -54,7 +55,7 @@ function mapDBToAuthUser(db: ProfileDB & { email_verified?: boolean }): AuthUser
 }
 
 /**
- * Get current user from session (server component)
+ * Get current user from the session (server component)
  * Returns array for backwards compatibility [user] or null
  */
 export async function getServerUser(): Promise<AuthUser[] | null> {
@@ -88,12 +89,13 @@ export async function getServerUser(): Promise<AuthUser[] | null> {
 }
 
 /**
- * Get user by ID
+ * Get user by ID (admin operation)
+ * Uses admin client with service role key.
  */
 export async function getUserById(userId: string): Promise<AuthUser[]> {
   try {
-    const supabase = await createClientSupabase();
-    const { data } = await supabase
+    const adminSupabase = createAdminSupabase();
+    const { data } = await adminSupabase
       .from("profiles")
       .select("*")
       .eq("id", userId)
@@ -103,8 +105,8 @@ export async function getUserById(userId: string): Promise<AuthUser[]> {
 
     const profile = data[0] as ProfileDB;
     
-    // Get email verification from auth.users
-    const { data: authUser } = await supabase.auth.admin.getUserById(userId);
+    // Get email verification from auth.users using admin client
+    const { data: authUser } = await adminSupabase.auth.admin.getUserById(userId);
     const emailVerified = authUser?.user?.email_confirmed_at !== null;
 
     return [mapDBToAuthUser({ ...profile, email_verified: emailVerified })];
@@ -115,12 +117,13 @@ export async function getUserById(userId: string): Promise<AuthUser[]> {
 }
 
 /**
- * Get user by email
+ * Get user by email (admin operation)
+ * Uses admin client with service role key.
  */
 export async function getUserByEmail(email: string): Promise<AuthUser[]> {
   try {
-    const supabase = await createClientSupabase();
-    const { data } = await supabase
+    const adminSupabase = createAdminSupabase();
+    const { data } = await adminSupabase
       .from("profiles")
       .select("*")
       .eq("email", email)
@@ -130,8 +133,8 @@ export async function getUserByEmail(email: string): Promise<AuthUser[]> {
 
     const profile = data[0] as ProfileDB;
     
-    // Get auth user to check email verification
-    const { data: authUsers } = await supabase.auth.admin.listUsers();
+    // Get auth user to check email verification via admin listUsers
+    const { data: authUsers } = await adminSupabase.auth.admin.listUsers();
     const authUser = authUsers.users.find(u => u.email === email);
     const emailVerified = authUser?.email_confirmed_at !== null;
 
@@ -149,3 +152,4 @@ export async function verifyAccessToken(token: string): Promise<{ userId: string
   console.warn("verifyAccessToken is deprecated - use Supabase auth instead");
   return null;
 }
+

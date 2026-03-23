@@ -29,7 +29,7 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 401 });
     }
 
-    const userType = profile.userType;
+    const userType = profile.user_type;
 
     // Build stats based on role
     let stats: any = { userType };
