@@ -42,21 +42,15 @@ function LoginForm() {
       console.log("Login success, user:", data.user?.id);
       toast.success("Welcome back!");
       
-      // Check if session was created
-      const { data: sessionData } = await supabase.auth.getSession();
-      console.log("Session after login:", sessionData.session ? "exists" : "missing");
-      
-      // Small delay for toast visibility
+      // Small delay for toast visibility, then hard redirect to ensure cookies are sent
       setTimeout(() => {
-        router.push(redirectTo);
-        router.refresh();
-      }, 1500);
+        window.location.href = redirectTo;
+      }, 1000);
     } catch (error: any) {
       console.error("Login caught error:", error);
       toast.error(error.message || "An unexpected error occurred");
       setLoading(false);
     }
-    // Removed finally block to avoid double-setLoading(false) when error occurs
   };
 
   return (
