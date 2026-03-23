@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,22 +31,39 @@ interface Stats {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/dashboard/stats")
-      .then(r => r.json())
+      .then(r => {
+        if (r.status === 401) {
+          // Not authenticated, redirect to login
+          window.location.href = `/login?redirect_to=${encodeURIComponent('/dashboard')}`;
+          return null;
+        }
+        return r;
+      })
+      .then(r => r?.json())
       .then(data => {
+        if (data && data.error) {
+          throw new Error(data.error);
+        }
         setStats(data);
         setLoading(false);
       })
       .catch(err => {
         console.error("Failed to load dashboard stats", err);
-        toast.error("Could not load dashboard data");
+        setError(err.message || "Failed to load dashboard data");
+        toast.error("Could not load dashboard data. Please log in again.");
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
         setLoading(false);
       });
-  }, []);
+  }, [router]);
 
   if (loading) {
     return <div className="p-8">Loading dashboard...</div>;

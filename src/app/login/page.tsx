@@ -28,27 +28,35 @@ function LoginForm() {
     setLoading(true);
     
     try {
+      console.log("Login attempt:", { email });
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("Login error:", error);
         throw new Error(error.message);
       }
 
+      console.log("Login success, user:", data.user?.id);
       toast.success("Welcome back!");
+      
+      // Check if session was created
+      const { data: sessionData } = await supabase.auth.getSession();
+      console.log("Session after login:", sessionData.session ? "exists" : "missing");
       
       // Small delay for toast visibility
       setTimeout(() => {
         router.push(redirectTo);
         router.refresh();
-      }, 1000);
+      }, 1500);
     } catch (error: any) {
+      console.error("Login caught error:", error);
       toast.error(error.message || "An unexpected error occurred");
-    } finally {
       setLoading(false);
     }
+    // Removed finally block to avoid double-setLoading(false) when error occurs
   };
 
   return (
