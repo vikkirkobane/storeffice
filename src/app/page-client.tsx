@@ -95,12 +95,12 @@ export default function HomePage() {
             >
               <Button asChild size="lg" className="h-14 px-8 text-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] border border-emerald-500/50 rounded-full transition-all group flex-1 sm:flex-none">
                 <Link href="/register" className="flex items-center gap-2 justify-center">
-                  List Your Space & Products
+                  Start with Storeffice
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg bg-slate-900/50 hover:bg-slate-800 border-slate-700 text-slate-300 backdrop-blur-md rounded-full flex-1 sm:flex-none">
-                <Link href="#investors" className="justify-center">View Platform Metrics</Link>
+                <Link href="#investors" className="justify-center">View Storeffice Metrics</Link>
               </Button>
             </motion.div>
           </motion.div>
