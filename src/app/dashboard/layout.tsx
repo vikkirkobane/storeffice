@@ -37,7 +37,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       try {
         const res = await fetch("/api/auth/session");
         const data = await res.json();
-        if (!data.authenticated) {
+        if (!data.user) {
           router.push("/login");
           return;
         }
