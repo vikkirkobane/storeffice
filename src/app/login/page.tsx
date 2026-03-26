@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabase-client";
 import { Eye, EyeOff } from "lucide-react";
 
 // Login form component that uses useSearchParams
@@ -28,26 +27,23 @@ function LoginForm() {
     setLoading(true);
     
     try {
-      console.log("Login attempt:", { email });
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) {
-        console.error("Login error:", error);
-        throw new Error(error.message);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Invalid credentials");
       }
 
-      console.log("Login success, user:", data.user?.id);
       toast.success("Welcome back!");
-      
-      // Small delay for toast visibility, then hard redirect to ensure cookies are sent
-      setTimeout(() => {
-        window.location.href = redirectTo;
-      }, 1000);
+      // Redirect immediately after successful login; cookies are set in the response
+      router.push(redirectTo);
     } catch (error: any) {
-      console.error("Login caught error:", error);
+      console.error("Login error:", error);
       toast.error(error.message || "An unexpected error occurred");
       setLoading(false);
     }
