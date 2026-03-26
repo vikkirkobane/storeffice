@@ -2,8 +2,11 @@ import { getServerUser } from "@/lib/auth-core";
 import { redirect } from "next/navigation";
 import OfficeSpaceForm from "@/components/office/office-space-form";
 
+export const dynamic = 'force-dynamic';
+
 export default async function NewOfficeSpacePage() {
-  const [user] = await getServerUser();
+  const userResult = await getServerUser();
+  const user = userResult?.[0];
   
   if (!user) {
     redirect("/login");
